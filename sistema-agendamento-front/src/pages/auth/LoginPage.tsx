@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { authService } from '@/services/authService'
+import { comercioService } from '@/services/comercioService'
 import { useAuthStore } from '@/store/authStore'
 import { userService } from '@/services/userService'
+import { Comercio } from '@/types/comercio'
 import { Button } from 'src/components/ui/button'
+import { Input } from 'src/components/ui/input'
+import {
+    Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from 'src/components/ui/form'
 
 const loginSchema = z.object({
     email: z.string().email('Email inválido'),
@@ -17,8 +23,9 @@ const loginSchema = z.object({
 const registerSchema = z.object({
     name: z.string().min(2, 'Mínimo 2 caracteres'),
     email: z.string().email('Email inválido'),
-    phone: z.string().transform((val) => val?.replace(/\D/g, '') || '').pipe(z.string().min(10, 'Telefone deve ter 10 ou 11 dígitos').max(11, 'Telefone deve ter 10 ou 11 dígitos')),
+    phone: z.string().min(8, 'Telefone inválido'),
     password: z.string().min(6, 'Mínimo 6 caracteres'),
+    comercioId: z.string().min(1, 'Selecione um comércio'),
 })
 
 type LoginData = z.infer<typeof loginSchema>
@@ -28,6 +35,11 @@ export function LoginPage() {
     const navigate = useNavigate()
     const { setAuth, setUser } = useAuthStore()
     const [tab, setTab] = useState<'login' | 'register'>('login')
+    const [comercios, setComercios] = useState<Comercio[]>([])
+
+    useEffect(() => {
+        comercioService.getAll().then(setComercios).catch(() => {})
+    }, [])
 
     const loginForm = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
@@ -36,7 +48,7 @@ export function LoginPage() {
 
     const registerForm = useForm<RegisterData>({
         resolver: zodResolver(registerSchema),
-        defaultValues: { name: '', email: '', phone: '', password: '' },
+        defaultValues: { name: '', email: '', phone: '', password: '', comercioId: '' },
     })
 
     const onLogin = async (data: LoginData) => {
@@ -54,7 +66,10 @@ export function LoginPage() {
 
     const onRegister = async (data: RegisterData) => {
         try {
-            await authService.register(data)
+            await authService.register({
+                ...data,
+                comercioId: Number(data.comercioId),
+            })
             toast.success('Conta criada! Faça login para continuar.')
             registerForm.reset()
             setTab('login')
@@ -64,57 +79,65 @@ export function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen w-full bg-[#0f1117] flex">
-            {/* Lado esquerdo — visual */}
-            <div className="hidden lg:flex flex-1 flex-col justify-between p-12 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent" />
-                <div className="relative z-10">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
-                            S.
-                        </div>
-                        <span className="text-white font-semibold">Sistema Agendamento</span>
+        <div className="min-h-screen w-full bg-[#13151a] flex">
+            {/* Lado esquerdo */}
+            <div className="hidden lg:flex flex-1 flex-col justify-between p-12 bg-[#0f1117] border-r border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
+                        S.
                     </div>
+                    <span className="text-white font-semibold">Sistema Agendamento</span>
                 </div>
 
-                <div className="relative z-10">
-                    <div className="space-y-8">
+                <div>
+                    <div className="space-y-6 mb-12">
                         {[
                             { icon: '📅', text: 'Agende serviços com facilidade' },
                             { icon: '✅', text: 'Acompanhe seus agendamentos em tempo real' },
                             { icon: '🔔', text: 'Receba confirmações instantâneas' },
                         ].map(({ icon, text }) => (
                             <div key={text} className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-xl">
+                                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-lg">
                                     {icon}
                                 </div>
-                                <p className="text-gray-300 text-base">{text}</p>
+                                <p className="text-gray-300 text-sm">{text}</p>
                             </div>
                         ))}
                     </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                        <p className="text-gray-400 text-sm italic mb-4">
+                            "Sistema muito prático, facilitou muito o gerenciamento dos nossos agendamentos!"
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs font-bold">
+                                A
+                            </div>
+                            <div>
+                                <p className="text-white text-xs font-medium">Admin</p>
+                                <p className="text-gray-500 text-xs">Gestor do sistema</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <p className="relative z-10 text-gray-500 text-sm">© 2025 Sistema Agendamento</p>
+                <p className="text-gray-600 text-xs">© 2025 Sistema Agendamento</p>
             </div>
 
-            {/* Lado direito — formulário */}
-            <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-                <div className="w-full max-w-md space-y-8">
-                    {/* Logo mobile */}
+            {/* Lado direito */}
+            <div className="flex-1 flex items-center justify-center p-6">
+                <div className="w-full max-w-md">
                     <div className="flex items-center gap-3 justify-center mb-8 lg:hidden">
-                        <div className="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
+                        <div className="w-9 h-9 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
                             S.
                         </div>
-                        <span className="text-white font-semibold text-lg">Sistema Agendamento</span>
+                        <span className="text-white font-semibold">Sistema Agendamento</span>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex bg-white/5 border border-white/10 rounded-xl p-1.5">
+                    <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 mb-6">
                         <button
                             onClick={() => setTab('login')}
-                            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 tab === 'login'
-                                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/25'
+                                    ? 'bg-cyan-500 text-black'
                                     : 'text-gray-400 hover:text-white'
                             }`}
                         >
@@ -122,17 +145,17 @@ export function LoginPage() {
                         </button>
                         <button
                             onClick={() => setTab('register')}
-                            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 tab === 'register'
-                                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/25'
+                                    ? 'bg-cyan-500 text-black'
                                     : 'text-gray-400 hover:text-white'
                             }`}
                         >
-                            Criar usuário
+                            Criar conta
                         </button>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl">
+                    <div className="bg-[#0f1117] border border-white/5 rounded-2xl p-8">
                         {tab === 'login' ? (
                             <>
                                 <h2 className="text-white text-2xl font-semibold mb-1">
@@ -141,35 +164,43 @@ export function LoginPage() {
                                 <p className="text-gray-400 text-sm mb-6">
                                     Entre com suas credenciais para continuar
                                 </p>
-
-                                <form
-                                    onSubmit={loginForm.handleSubmit(onLogin)}
-                                    className="space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <label className="text-gray-300 text-sm">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="seu@email.com"
-                                            className="w-full h-10 px-3 rounded-md border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-cyan-500 focus:outline-none"
-                                            {...loginForm.register('email')}
-                                        />
-                                        {loginForm.formState.errors.email && (
-                                            <p className="text-red-500 text-xs">{loginForm.formState.errors.email.message as string}</p>
-                                        )}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-gray-300 text-sm">Senha</label>
-                                            <input
-                                                type="password"
-                                                placeholder="••••••••"
-                                                className="w-full h-10 px-3 rounded-md border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-cyan-500 focus:outline-none"
-                                                {...loginForm.register('password')}
-                                            />
-                                            {loginForm.formState.errors.password && (
-                                                <p className="text-red-500 text-xs">{loginForm.formState.errors.password.message as string}</p>
+                                <Form {...loginForm}>
+                                    <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                                        <FormField
+                                            control={loginForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            placeholder="seu@email.com"
+                                                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
                                             )}
-                                        </div>
+                                        />
+                                        <FormField
+                                            control={loginForm.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Senha</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="password"
+                                                            placeholder="••••••••"
+                                                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                         <Button
                                             type="submit"
                                             disabled={loginForm.formState.isSubmitting}
@@ -178,95 +209,116 @@ export function LoginPage() {
                                             {loginForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
                                         </Button>
                                     </form>
-
+                                </Form>
                                 <p className="text-center text-gray-500 text-xs mt-4">
                                     Não tem uma conta?{' '}
-                                    <button
-                                        onClick={() => setTab('register')}
-                                        className="text-cyan-400 hover:text-cyan-300 transition-colors"
-                                    >
-                                        Criar usuário
+                                    <button onClick={() => setTab('register')} className="text-cyan-400 hover:text-cyan-300">
+                                        Criar conta
                                     </button>
                                 </p>
                             </>
                         ) : (
                             <>
-                                <h2 className="text-white text-2xl font-semibold mb-1">
-                                    Criar usuário
-                                </h2>
-                                <p className="text-gray-400 text-sm mb-6">
-                                    Preencha os dados para se cadastrar
-                                </p>
+                                <h2 className="text-white text-2xl font-semibold mb-1">Criar conta</h2>
+                                <p className="text-gray-400 text-sm mb-6">Preencha os dados para se cadastrar</p>
+                                <Form {...registerForm}>
+                                    <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Nome</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} placeholder="Seu nome completo"
+                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} placeholder="seu@email.com"
+                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="phone"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Telefone</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} placeholder="(11) 99999-9999"
+                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Senha</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} type="password" placeholder="••••••••"
+                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                <form
-                                    onSubmit={registerForm.handleSubmit(onRegister)}
-                                    className="space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <label className="text-gray-300 text-sm">Nome</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Seu nome completo"
-                                            className="w-full h-10 px-3 rounded-md border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-cyan-500 focus:outline-none"
-                                            {...registerForm.register('name')}
+                                        {/* ✅ Select de comércio */}
+                                        <FormField
+                                            control={registerForm.control}
+                                            name="comercioId"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-gray-300">Comércio</FormLabel>
+                                                    <FormControl>
+                                                        <select
+                                                            {...field}
+                                                            className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500"
+                                                        >
+                                                            <option value="" className="bg-[#0f1117]">
+                                                                Selecione um comércio
+                                                            </option>
+                                                            {comercios.map((c) => (
+                                                                <option key={c.id} value={c.id} className="bg-[#0f1117]">
+                                                                    {c.nome}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                        {registerForm.formState.errors.name && (
-                                            <p className="text-red-500 text-xs">{registerForm.formState.errors.name.message as string}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-gray-300 text-sm">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="seu@email.com"
-                                            className="w-full h-10 px-3 rounded-md border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-cyan-500 focus:outline-none"
-                                            {...registerForm.register('email')}
-                                        />
-                                        {registerForm.formState.errors.email && (
-                                            <p className="text-red-500 text-xs">{registerForm.formState.errors.email.message as string}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-gray-300 text-sm">Telefone</label>
-                                        <input
-                                            type="text"
-                                            placeholder="(11) 99999-9999"
-                                            className="w-full h-10 px-3 rounded-md border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-cyan-500 focus:outline-none"
-                                            {...registerForm.register('phone')}
-                                        />
-                                        {registerForm.formState.errors.phone && (
-                                            <p className="text-red-500 text-xs">{registerForm.formState.errors.phone.message as string}</p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-gray-300 text-sm">Senha</label>
-                                        <input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="w-full h-10 px-3 rounded-md border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-cyan-500 focus:outline-none"
-                                            {...registerForm.register('password')}
-                                        />
-                                        {registerForm.formState.errors.password && (
-                                            <p className="text-red-500 text-xs">{registerForm.formState.errors.password.message as string}</p>
-                                        )}
-                                    </div>
+
                                         <Button
                                             type="submit"
                                             disabled={registerForm.formState.isSubmitting}
                                             className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold mt-2"
                                         >
-                                            {registerForm.formState.isSubmitting
-                                                ? 'Criando...'
-                                                : 'Criar usuário'}
+                                            {registerForm.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
                                         </Button>
                                     </form>
-
+                                </Form>
                                 <p className="text-center text-gray-500 text-xs mt-4">
                                     Já tem uma conta?{' '}
-                                    <button
-                                        onClick={() => setTab('login')}
-                                        className="text-cyan-400 hover:text-cyan-300 transition-colors"
-                                    >
+                                    <button onClick={() => setTab('login')} className="text-cyan-400 hover:text-cyan-300">
                                         Entrar
                                     </button>
                                 </p>

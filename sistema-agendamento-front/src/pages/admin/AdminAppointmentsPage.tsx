@@ -1,24 +1,19 @@
 import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment, AppointmentStatus } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Button } from 'src/components/ui/button'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-const STATUS_LABELS: Record<string, string> = {
-    '': 'Todos',
-    PENDING: 'Pendentes',
-    CONFIRMED: 'Confirmados',
-    CANCELED: 'Cancelados',
-    FINISHED: 'Finalizados',
-}
+const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
+    { value: 'PENDING', label: 'Pendente' },
+    { value: 'CONFIRMED', label: 'Confirmado' },
+    { value: 'CANCELED', label: 'Cancelado' },
+    { value: 'FINISHED', label: 'Finalizado' },
+]
 
-export function AppointmentsPage() {
-    const navigate = useNavigate()
+export function AdminAppointmentsPage() {
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [filterStatus, setFilterStatus] = useState<AppointmentStatus | ''>('')
@@ -26,7 +21,7 @@ export function AppointmentsPage() {
     const load = async () => {
         setLoading(true)
         try {
-            const data = await appointmentService.myAppointments(
+            const data = await appointmentService.getAllAppointments(
                 filterStatus || undefined
             )
             setAppointments(data)
@@ -39,41 +34,45 @@ export function AppointmentsPage() {
 
     useEffect(() => { load() }, [filterStatus])
 
-    const handleCancel = async (id: number) => {
+    const handleStatusUpdate = async (
+        id: number,
+        status: AppointmentStatus
+    ) => {
         try {
-            await appointmentService.cancel(id)
-            toast.success('Agendamento cancelado!')
+            await appointmentService.updateStatus(id, status)
+            toast.success('Status atualizado!')
             load()
         } catch {
-            toast.error('Erro ao cancelar agendamento!')
+            toast.error('Erro ao atualizar status!')
         }
     }
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex gap-2 flex-wrap">
-                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                        <button
-                            key={value}
-                            onClick={() => setFilterStatus(value as AppointmentStatus | '')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                filterStatus === value
-                                    ? 'bg-cyan-500 text-black'
-                                    : 'bg-white/5 text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-                <Button
-                    onClick={() => navigate('/appointments/new')}
-                    className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
+            <div className="flex gap-2 flex-wrap">
+                <button
+                    onClick={() => setFilterStatus('')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        filterStatus === ''
+                            ? 'bg-cyan-500 text-black'
+                            : 'bg-white/5 text-gray-400 hover:text-white'
+                    }`}
                 >
-                    <Plus size={16} className="mr-2" />
-                    Novo Agendamento
-                </Button>
+                    Todos
+                </button>
+                {STATUS_OPTIONS.map((s) => (
+                    <button
+                        key={s.value}
+                        onClick={() => setFilterStatus(s.value)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                            filterStatus === s.value
+                                ? 'bg-cyan-500 text-black'
+                                : 'bg-white/5 text-gray-400 hover:text-white'
+                        }`}
+                    >
+                        {s.label}
+                    </button>
+                ))}
             </div>
 
             <div className="bg-[#0f1117] border border-white/5 rounded-xl overflow-hidden">
@@ -86,17 +85,12 @@ export function AppointmentsPage() {
                 ) : appointments.length === 0 ? (
                     <div className="p-12 text-center">
                         <p className="text-gray-500">Nenhum agendamento encontrado.</p>
-                        <Button
-                            onClick={() => navigate('/appointments/new')}
-                            className="mt-4 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
-                        >
-                            Criar primeiro agendamento
-                        </Button>
                     </div>
                 ) : (
                     <table className="w-full text-sm">
                         <thead className="border-b border-white/5">
                         <tr className="text-gray-500">
+                            <th className="text-left p-4 font-medium">Cliente</th>
                             <th className="text-left p-4 font-medium">Serviço</th>
                             <th className="text-left p-4 font-medium">Data</th>
                             <th className="text-left p-4 font-medium">Horário</th>
@@ -108,7 +102,8 @@ export function AppointmentsPage() {
                         <tbody className="divide-y divide-white/5">
                         {appointments.map((a) => (
                             <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
-                                <td className="p-4 text-white font-medium">{a.jobName}</td>
+                                <td className="p-4 text-white font-medium">{a.userName}</td>
+                                <td className="p-4 text-gray-400">{a.jobName}</td>
                                 <td className="p-4 text-gray-400">
                                     {format(new Date(a.date), 'dd MMM yyyy', { locale: ptBR })}
                                 </td>
@@ -120,14 +115,19 @@ export function AppointmentsPage() {
                                     <StatusBadge status={a.status} />
                                 </td>
                                 <td className="p-4">
-                                    {(a.status === 'PENDING' || a.status === 'CONFIRMED') && (
-                                        <button
-                                            onClick={() => handleCancel(a.id)}
-                                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                                        >
-                                            Cancelar
-                                        </button>
-                                    )}
+                                    <select
+                                        value={a.status}
+                                        onChange={(e) =>
+                                            handleStatusUpdate(a.id, e.target.value as AppointmentStatus)
+                                        }
+                                        className="bg-white/5 border border-white/10 text-white rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-cyan-500"
+                                    >
+                                        {STATUS_OPTIONS.map((s) => (
+                                            <option key={s.value} value={s.value} className="bg-[#0f1117]">
+                                                {s.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </td>
                             </tr>
                         ))}

@@ -1,9 +1,18 @@
 import api from './api'
-import { Appointment, CreateAppointmentRequest, AppointmentStatus } from '@/types/appointment'
+import {
+    Appointment,
+    CreateAppointmentRequest,
+    AppointmentStatus,
+} from '@/types/appointment'
 
 export const appointmentService = {
-    myAppointments: async (status?: AppointmentStatus, date?: string): Promise<Appointment[]> => {
-        const response = await api.get('/v1/appointment/me', { params: { status, date } })
+    myAppointments: async (
+        status?: AppointmentStatus,
+        date?: string
+    ): Promise<Appointment[]> => {
+        const response = await api.get('/v1/appointment/me', {
+            params: { status, date },
+        })
         return response.data
     },
 
@@ -12,8 +21,13 @@ export const appointmentService = {
         return response.data
     },
 
-    getAllAppointments: async (status?: AppointmentStatus, date?: string): Promise<Appointment[]> => {
-        const response = await api.get('/v1/appointment/all', { params: { status, date } })
+    getAllAppointments: async (
+        status?: AppointmentStatus,
+        date?: string
+    ): Promise<Appointment[]> => {
+        const response = await api.get('/v1/appointment/all', {
+            params: { status, date },
+        })
         return response.data
     },
 
@@ -22,8 +36,13 @@ export const appointmentService = {
         return response.data
     },
 
-    getAvailableTimes: async (date: string, jobId: number): Promise<string[]> => {
-        const response = await api.get('/v1/appointment/available', { params: { date, jobId } })
+    getAvailableTimes: async (
+        date: string,
+        jobId: number
+    ): Promise<string[]> => {
+        const response = await api.get('/v1/appointment/available', {
+            params: { date, jobId },
+        })
         return response.data
     },
 
@@ -35,7 +54,12 @@ export const appointmentService = {
         await api.put(`/v1/appointment/cancel/${id}`)
     },
 
-    updateStatus: async (id: number, status: AppointmentStatus): Promise<void> => {
-        await api.put(`/v1/appointment/status/${id}`, null, { params: { status } })
+    updateStatus: async (
+        id: number,
+        status: AppointmentStatus
+    ): Promise<void> => {
+        await api.put(`/v1/appointment/status/${id}`, null, {
+            params: { status },
+        })
     },
 }

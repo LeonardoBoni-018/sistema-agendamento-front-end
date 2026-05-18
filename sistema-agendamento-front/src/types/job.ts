@@ -4,6 +4,8 @@ export interface Job {
     description: string
     price: number
     durationMinutes: number
+    comercioId: number
+    comercioNome: string
 }
 
 export interface CreateJobRequest {

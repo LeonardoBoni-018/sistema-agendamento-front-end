@@ -10,6 +10,7 @@ interface AuthState {
     setUser: (user: User) => void
     logout: () => void
     isAdmin: () => boolean
+    getComercioId: () => number | null
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -18,12 +19,27 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             refreshToken: null,
             user: null,
+
             setAuth: (token, refreshToken) => set({ token, refreshToken }),
             setUser: (user) => set({ user }),
             logout: () => set({ token: null, refreshToken: null, user: null }),
+
             isAdmin: () => {
-                const user = get().user
-                return user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN'
+                const token = get().token
+                if (!token) return false
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]))
+                    const roles: string[] = payload.roles ?? payload.authorities ?? []
+                    return roles.some(r =>
+                        r === 'ROLE_ADMIN' || r === 'ADMIN'
+                    )
+                } catch {
+                    return false
+                }
+            },
+
+            getComercioId: () => {
+                return get().user?.comercioId ?? null
             },
         }),
         { name: 'auth-storage' }

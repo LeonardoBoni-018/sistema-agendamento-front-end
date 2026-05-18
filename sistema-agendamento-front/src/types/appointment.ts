@@ -12,6 +12,8 @@ export interface Appointment {
     jobName: string
     jobPrice: number
     jobDurationMinutes: number
+    comercioId: number
+    comercioNome: string
     date: string
     time: string
     status: AppointmentStatus

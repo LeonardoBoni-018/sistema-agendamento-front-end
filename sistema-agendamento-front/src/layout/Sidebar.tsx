@@ -5,23 +5,33 @@ import {
     Briefcase,
     User,
     LogOut,
+    Users,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authService } from '@/services/authService'
 
-const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/appointments', icon: Calendar, label: 'Agendamentos' },
-    { to: '/jobs', icon: Briefcase, label: 'Serviços' },
-    { to: '/profile', icon: User, label: 'Perfil' },
-]
-
 export function Sidebar() {
-    const { logout, user } = useAuthStore()
+    const { logout, user, isAdmin } = useAuthStore()
+    const admin = isAdmin()
+
+    const navItems = [
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+        { to: '/appointments', icon: Calendar, label: 'Agendamentos' },
+        ...(admin
+            ? [{ to: '/jobs', icon: Briefcase, label: 'Serviços' }]
+            : []),
+        ...(admin
+            ? [{ to: '/admin/appointments', icon: Users, label: 'Todos Agendamentos' }]
+            : []),
+        { to: '/profile', icon: User, label: 'Perfil' },
+    ]
 
     const handleLogout = async () => {
-        await authService.logout()
-        logout()
+        try {
+            await authService.logout()
+        } finally {
+            logout()
+        }
     }
 
     return (
@@ -30,7 +40,14 @@ export function Sidebar() {
                 <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
                     S.
                 </div>
-                <span className="text-white font-semibold text-sm">Sistema Agendamento</span>
+                <div className="flex-1 min-w-0">
+          <span className="text-white font-semibold text-sm block truncate">
+            {user?.comercioNome ?? 'Sistema Agendamento'}
+          </span>
+                    {admin && (
+                        <span className="text-cyan-400 text-xs">Admin</span>
+                    )}
+                </div>
             </div>
 
             <nav className="flex-1 px-3 space-y-1">
@@ -58,7 +75,9 @@ export function Sidebar() {
                         {user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-medium truncate">{user?.name}</p>
+                        <p className="text-white text-xs font-medium truncate">
+                            {user?.name}
+                        </p>
                         <p className="text-gray-500 text-xs truncate">{user?.email}</p>
                     </div>
                 </div>

@@ -3,7 +3,8 @@ export interface User {
     name: string
     email: string
     phone: string
-    role?: string
+    comercioId: number | null
+    comercioNome: string | null
 }
 
 export interface LoginRequest {
@@ -16,6 +17,7 @@ export interface RegisterRequest {
     email: string
     phone: string
     password: string
+    comercioId: number
 }
 
 export interface TokenResponse {

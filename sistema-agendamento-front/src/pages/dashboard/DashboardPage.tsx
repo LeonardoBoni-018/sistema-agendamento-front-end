@@ -3,17 +3,18 @@ import { Calendar, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { useAuthStore } from '@/store/authStore'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-interface StatCardProps {
+function StatCard({
+                      title, value, icon, color,
+                  }: {
     title: string
-    value: string | number
+    value: number
     icon: React.ReactNode
     color: string
-}
-
-function StatCard({ title, value, icon, color }: StatCardProps) {
+}) {
     return (
         <div className="bg-[#0f1117] border border-white/5 rounded-xl p-5 flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
@@ -28,14 +29,18 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
 }
 
 export function DashboardPage() {
+    const { isAdmin, user } = useAuthStore()
+    const admin = isAdmin()
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        appointmentService.myAppointments()
-            .then(setAppointments)
-            .finally(() => setLoading(false))
-    }, [])
+        const load = admin
+            ? appointmentService.getAllAppointments()
+            : appointmentService.myAppointments()
+
+        load.then(setAppointments).finally(() => setLoading(false))
+    }, [admin])
 
     const pending = appointments.filter(a => a.status === 'PENDING').length
     const confirmed = appointments.filter(a => a.status === 'CONFIRMED').length
@@ -48,6 +53,19 @@ export function DashboardPage() {
 
     return (
         <div className="space-y-6">
+            {/* Saudação */}
+            <div>
+                <h2 className="text-white text-lg font-semibold">
+                    Olá, {user?.name?.split(' ')[0]} 👋
+                </h2>
+                <p className="text-gray-500 text-sm">
+                    {admin
+                        ? `Visão geral do comércio ${user?.comercioNome}`
+                        : `Seus agendamentos em ${user?.comercioNome}`}
+                </p>
+            </div>
+
+            {/* Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     title="Total"
@@ -75,8 +93,11 @@ export function DashboardPage() {
                 />
             </div>
 
+            {/* Tabela próximos */}
             <div className="bg-[#0f1117] border border-white/5 rounded-xl p-6">
-                <h2 className="text-white font-semibold mb-4">Próximos Agendamentos</h2>
+                <h2 className="text-white font-semibold mb-4">
+                    {admin ? 'Próximos Agendamentos do Comércio' : 'Meus Próximos Agendamentos'}
+                </h2>
 
                 {loading ? (
                     <div className="space-y-3">
@@ -91,6 +112,7 @@ export function DashboardPage() {
                         <table className="w-full text-sm">
                             <thead>
                             <tr className="text-gray-500 border-b border-white/5">
+                                {admin && <th className="text-left pb-3 font-medium">Cliente</th>}
                                 <th className="text-left pb-3 font-medium">Serviço</th>
                                 <th className="text-left pb-3 font-medium">Data</th>
                                 <th className="text-left pb-3 font-medium">Horário</th>
@@ -98,15 +120,18 @@ export function DashboardPage() {
                             </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                            {upcoming.map((appointment) => (
-                                <tr key={appointment.id}>
-                                    <td className="py-3 text-white">{appointment.jobName}</td>
+                            {upcoming.map((a) => (
+                                <tr key={a.id}>
+                                    {admin && (
+                                        <td className="py-3 text-gray-400">{a.userName}</td>
+                                    )}
+                                    <td className="py-3 text-white">{a.jobName}</td>
                                     <td className="py-3 text-gray-400">
-                                        {format(new Date(appointment.date), 'dd MMM yyyy', { locale: ptBR })}
+                                        {format(new Date(a.date), 'dd MMM yyyy', { locale: ptBR })}
                                     </td>
-                                    <td className="py-3 text-gray-400">{appointment.time}</td>
+                                    <td className="py-3 text-gray-400">{a.time}</td>
                                     <td className="py-3">
-                                        <StatusBadge status={appointment.status} />
+                                        <StatusBadge status={a.status} />
                                     </td>
                                 </tr>
                             ))}
@@ -116,6 +141,7 @@ export function DashboardPage() {
                 )}
             </div>
 
+            {/* Resumo */}
             <div className="bg-[#0f1117] border border-white/5 rounded-xl p-6">
                 <h2 className="text-white font-semibold mb-4">Resumo</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
