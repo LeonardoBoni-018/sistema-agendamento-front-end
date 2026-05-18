@@ -116,11 +116,26 @@ export function JobsPage() {
                 </div>
             )}
 
+            {!isAdmin() && (
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+                    <p className="text-amber-400 text-sm">
+                        <span className="font-semibold">Acesso restrito:</span> Apenas administradores podem gerenciar serviços.
+                    </p>
+                </div>
+            )}
+
             {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="h-36 bg-[#0f1117] rounded-xl animate-pulse border border-white/5" />
                     ))}
+                </div>
+            ) : jobs.length === 0 ? (
+                <div className="text-center py-12">
+                    <p className="text-gray-500 mb-2">Nenhum serviço disponível no momento.</p>
+                    {!isAdmin() && (
+                        <p className="text-gray-600 text-sm">Entre em contato com um administrador para adicionar serviços.</p>
+                    )}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

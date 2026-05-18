@@ -22,14 +22,8 @@ export const useAuthStore = create<AuthState>()(
             setUser: (user) => set({ user }),
             logout: () => set({ token: null, refreshToken: null, user: null }),
             isAdmin: () => {
-                const token = get().token
-                if (!token) return false
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]))
-                    return payload.roles?.includes('ROLE_ADMIN') ?? false
-                } catch {
-                    return false
-                }
+                const user = get().user
+                return user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN'
             },
         }),
         { name: 'auth-storage' }
