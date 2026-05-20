@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import * as Dialog from '@/components/ui/dialog'
 
 const FILTERS = [
     { value: '', label: 'Todos' },
@@ -26,9 +27,10 @@ export function AdminAppointmentsPage() {
     const [rawData, setRawData] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<AppointmentStatus | ''>('')
+    const [confirmingStatus, setConfirmingStatus] = useState<{appointment: Appointment; status: AppointmentStatus} | null>(null)
 
     // ✅ Admin vê todos — sem filtro por userId
-    const { appointments } = useRealtimeAppointments(rawData)
+    const { appointments } = useRealtimeAppointments(rawData, { isAdmin: true })
 
     const load = async () => {
         setLoading(true)
@@ -44,10 +46,19 @@ export function AdminAppointmentsPage() {
 
     useEffect(() => { load() }, [filter])
 
-    const handleStatusUpdate = async (id: number, status: AppointmentStatus) => {
+    const handleStatusUpdate = (appointment: Appointment, newStatus: AppointmentStatus) => {
+        if (appointment.status === newStatus) return
+
+        if (newStatus === 'CANCELED' || newStatus === 'FINISHED') {
+            setConfirmingStatus({ appointment, status: newStatus })
+        } else {
+            executeStatusUpdate(appointment.id, newStatus)
+        }
+    }
+
+    const executeStatusUpdate = async (id: number, status: AppointmentStatus) => {
         try {
             await appointmentService.updateStatus(id, status)
-            // ✅ A atualização vem via SSE automaticamente
         } catch {
             toast.error('Erro ao atualizar status')
         }
@@ -142,7 +153,7 @@ export function AdminAppointmentsPage() {
                                 <StatusBadge status={a.status} />
                                 <select
                                     value={a.status}
-                                    onChange={e => handleStatusUpdate(a.id, e.target.value as AppointmentStatus)}
+                                    onChange={e => handleStatusUpdate(a, e.target.value as AppointmentStatus)}
                                     style={{
                                         background: 'var(--bg-surface)', border: '1px solid var(--border)',
                                         borderRadius: 'var(--radius-sm)', padding: '5px 8px',
@@ -158,6 +169,49 @@ export function AdminAppointmentsPage() {
                     </>
                 )}
             </div>
+
+            <Dialog.Dialog open={!!confirmingStatus} onOpenChange={() => setConfirmingStatus(null)}>
+                <Dialog.DialogContent style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', maxWidth: 400,
+                }}>
+                    <Dialog.DialogHeader>
+                        <Dialog.DialogTitle style={{
+                            fontSize: 16, fontWeight: 600, color: 'var(--text)',
+                        }}>
+                            {confirmingStatus?.status === 'CANCELED' ? 'Cancelar agendamento?' : 'Finalizar agendamento?'}
+                        </Dialog.DialogTitle>
+                        <Dialog.DialogDescription style={{
+                            fontSize: 13, color: 'var(--text-muted)', marginTop: 4,
+                        }}>
+                            {confirmingStatus && `Você está prestes a ${confirmingStatus.status === 'CANCELED' ? 'cancelar' : 'finalizar'} o agendamento de ${confirmingStatus.appointment.userName} (${confirmingStatus.appointment.jobName}). Esta ação não pode ser desfeita.`}
+                        </Dialog.DialogDescription>
+                    </Dialog.DialogHeader>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, justifyContent: 'flex-end' }}>
+                        <button onClick={() => setConfirmingStatus(null)} style={{
+                            padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            background: 'var(--bg-surface)', color: 'var(--text-muted)',
+                            border: '1px solid var(--border)',
+                        }}>
+                            Cancelar
+                        </button>
+                        <button onClick={() => {
+                            if (confirmingStatus) {
+                                executeStatusUpdate(confirmingStatus.appointment.id, confirmingStatus.status)
+                                setConfirmingStatus(null)
+                            }
+                        }} style={{
+                            padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            background: confirmingStatus?.status === 'CANCELED' ? 'var(--danger)' : 'var(--success)',
+                            color: 'white', border: 'none',
+                        }}>
+                            {confirmingStatus?.status === 'CANCELED' ? 'Sim, cancelar' : 'Sim, finalizar'}
+                        </button>
+                    </div>
+                </Dialog.DialogContent>
+            </Dialog.Dialog>
         </div>
     )
 }

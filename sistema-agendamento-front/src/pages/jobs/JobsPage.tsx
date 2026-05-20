@@ -5,7 +5,7 @@ import { Job } from '@/types/job'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { sseService, SsePayload } from '@/services/sseService'
+import { sseService } from '@/services/sseService'
 
 const schema = z.object({
     name: z.string().min(1, 'Nome obrigatório'),
@@ -30,13 +30,32 @@ export function JobsPage() {
         jobService.getAll().then(setJobs).finally(() => setLoading(false))
     }
 
-    useEffect(() => { 
-        load() 
-        
-        const unsubCreate = sseService.on('JOB_CREATED', () => load())
-        const unsubUpdate = sseService.on('JOB_UPDATED', () => load())
-        const unsubDelete = sseService.on('JOB_DELETED', () => load())
-        
+    useEffect(() => {
+        load()
+
+        const unsubCreate = sseService.on('JOB_CREATED', (payload) => {
+            load()
+            toast.success(payload.data.message ?? 'Novo serviço criado', {
+                description: payload.data.job?.name,
+                duration: 4000,
+            })
+        })
+
+        const unsubUpdate = sseService.on('JOB_UPDATED', (payload) => {
+            load()
+            toast.info(payload.data.message ?? 'Serviço atualizado', {
+                description: payload.data.job?.name,
+                duration: 4000,
+            })
+        })
+
+        const unsubDelete = sseService.on('JOB_DELETED', (payload) => {
+            load()
+            toast.warning(payload.data.message ?? 'Serviço removido', {
+                duration: 4000,
+            })
+        })
+
         return () => {
             unsubCreate()
             unsubUpdate()

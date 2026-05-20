@@ -4,6 +4,7 @@ import { appointmentService } from '@/services/appointmentService'
 import { Appointment } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { useAuthStore } from '@/store/authStore'
+import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
 import { format, isToday, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -27,6 +28,10 @@ export function DashboardPage() {
     const admin = isAdmin()
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
+    const { appointments: realtimeAppointments } = useRealtimeAppointments(appointments, {
+        isAdmin: admin,
+        filterUserId: admin ? undefined : user?.id
+    })
 
     useEffect(() => {
         const load = admin
@@ -35,14 +40,16 @@ export function DashboardPage() {
         load.then(setAppointments).finally(() => setLoading(false))
     }, [admin])
 
-    const todayAppointments = appointments.filter(a => {
+    const displayAppointments = loading ? appointments : realtimeAppointments
+
+    const todayAppointments = displayAppointments.filter(a => {
         try { return isToday(parseISO(a.date)) } catch { return false }
     })
-    const pending = appointments.filter(a => a.status === 'PENDING').length
-    const confirmed = appointments.filter(a => a.status === 'CONFIRMED').length
-    const canceled = appointments.filter(a => a.status === 'CANCELED').length
+    const pending = displayAppointments.filter(a => a.status === 'PENDING').length
+    const confirmed = displayAppointments.filter(a => a.status === 'CONFIRMED').length
+    const canceled = displayAppointments.filter(a => a.status === 'CANCELED').length
 
-    const upcoming = appointments
+    const upcoming = displayAppointments
         .filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED')
         .slice(0, 6)
 

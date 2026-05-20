@@ -8,6 +8,7 @@ interface Options {
     onUpdated?: (appointment: Appointment) => void
     onCanceled?: (appointment: Appointment) => void
     filterUserId?: number
+    isAdmin?: boolean
 }
 
 export function useRealtimeAppointments(
@@ -21,11 +22,13 @@ export function useRealtimeAppointments(
     }, [initialData.length])
 
     useEffect(() => {
+        const shouldFilterByUser = !options.isAdmin && options.filterUserId != null
+
         const unsubCreate = sseService.on('APPOINTMENT_CREATED', (payload: SsePayload) => {
             const appt: Appointment = payload.data.appointment
             const msg: string = payload.data.message ?? 'Novo agendamento criado'
 
-            if (options.filterUserId && appt.userId !== options.filterUserId) return
+            if (shouldFilterByUser && appt.userId !== options.filterUserId) return
 
             setAppointments(prev => {
                 const exists = prev.find(a => a.id === appt.id)
@@ -45,7 +48,7 @@ export function useRealtimeAppointments(
             const appt: Appointment = payload.data.appointment
             const msg: string = payload.data.message ?? 'Status atualizado'
 
-            if (options.filterUserId && appt.userId !== options.filterUserId) return
+            if (shouldFilterByUser && appt.userId !== options.filterUserId) return
 
             setAppointments(prev =>
                 prev.map(a => a.id === appt.id ? appt : a)
@@ -65,7 +68,7 @@ export function useRealtimeAppointments(
             const appt: Appointment = payload.data.appointment
             const msg: string = payload.data.message ?? 'Agendamento cancelado'
 
-            if (options.filterUserId && appt.userId !== options.filterUserId) return
+            if (shouldFilterByUser && appt.userId !== options.filterUserId) return
 
             setAppointments(prev =>
                 prev.map(a => a.id === appt.id ? appt : a)
@@ -80,7 +83,7 @@ export function useRealtimeAppointments(
             unsubUpdated()
             unsubCanceled()
         }
-    }, [options.filterUserId])
+    }, [options.filterUserId, options.isAdmin])
 
     return { appointments, setAppointments }
 }

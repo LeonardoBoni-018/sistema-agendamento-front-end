@@ -10,6 +10,7 @@ import { jobService } from '@/services/jobService'
 import { Job } from '@/types/job'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import * as Dialog from '@/components/ui/dialog'
 
 const FILTERS = [
     { value: '', label: 'Todos' },
@@ -32,9 +33,11 @@ export function AppointmentsPage() {
     const [loadingTimes, setLoadingTimes] = useState(false)
     const [novoHorario, setNovoHorario] = useState('')
     const [_, setJobs] = useState<Job[]>([])
+    const [cancelando, setCancelando] = useState<Appointment | null>(null)
 
     const { appointments } = useRealtimeAppointments(rawData, {
-        filterUserId: user?.id,
+        filterUserId: user?.id!,
+        isAdmin: false,
     })
 
     const load = async () => {
@@ -322,7 +325,7 @@ export function AppointmentsPage() {
                                                 Reagendar
                                             </button>
                                             <button
-                                                onClick={() => handleCancel(a.id)}
+                                                onClick={() => setCancelando(a)}
                                                 style={{
                                                     fontSize: 11, fontWeight: 600, color: 'var(--danger)',
                                                     background: 'none', border: 'none', cursor: 'pointer',
@@ -338,6 +341,49 @@ export function AppointmentsPage() {
                     </>
                 )}
             </div>
+
+            <Dialog.Dialog open={!!cancelando} onOpenChange={() => setCancelando(null)}>
+                <Dialog.DialogContent style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', maxWidth: 400,
+                }}>
+                    <Dialog.DialogHeader>
+                        <Dialog.DialogTitle style={{
+                            fontSize: 16, fontWeight: 600, color: 'var(--text)',
+                        }}>
+                            Cancelar agendamento?
+                        </Dialog.DialogTitle>
+                        <Dialog.DialogDescription style={{
+                            fontSize: 13, color: 'var(--text-muted)', marginTop: 4,
+                        }}>
+                            {cancelando && `Você está prestes a cancelar o agendamento de ${cancelando.jobName} em ${format(parseISO(cancelando.date), "dd 'de' MMMM", { locale: ptBR })} às ${cancelando.time?.slice(0, 5)}. Esta ação não pode ser desfeita.`}
+                        </Dialog.DialogDescription>
+                    </Dialog.DialogHeader>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, justifyContent: 'flex-end' }}>
+                        <button onClick={() => setCancelando(null)} style={{
+                            padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            background: 'var(--bg-surface)', color: 'var(--text-muted)',
+                            border: '1px solid var(--border)',
+                        }}>
+                            Não, manter
+                        </button>
+                        <button onClick={() => {
+                            if (cancelando) {
+                                handleCancel(cancelando.id)
+                                setCancelando(null)
+                            }
+                        }} style={{
+                            padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            background: 'var(--danger)', color: 'white',
+                            border: 'none',
+                        }}>
+                            Sim, cancelar
+                        </button>
+                    </div>
+                </Dialog.DialogContent>
+            </Dialog.Dialog>
         </div>
     )
 }
