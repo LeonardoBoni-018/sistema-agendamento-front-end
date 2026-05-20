@@ -7,16 +7,6 @@ import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
 import { jobService } from '@/services/jobService'
 import { Job } from '@/types/job'
-import { Button } from '@/components/ui/button'
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 
 const schema = z.object({
     jobId: z.string().min(1, 'Selecione um serviço'),
@@ -29,28 +19,27 @@ type FormData = z.infer<typeof schema>
 export function NewAppointmentPage() {
     const navigate = useNavigate()
     const [jobs, setJobs] = useState<Job[]>([])
-    const [availableTimes, setAvailableTimes] = useState<string[]>([])
+    const [times, setTimes] = useState<string[]>([])
     const [loadingTimes, setLoadingTimes] = useState(false)
 
-    const form = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: { jobId: '', date: '', time: '' },
     })
 
-    const watchedDate = form.watch('date')
-    const watchedJobId = form.watch('jobId')
+    const watchedDate = watch('date')
+    const watchedJobId = watch('jobId')
+    const watchedTime = watch('time')
 
-    useEffect(() => {
-        jobService.getAll().then(setJobs)
-    }, [])
+    useEffect(() => { jobService.getAll().then(setJobs) }, [])
 
     useEffect(() => {
         if (watchedDate && watchedJobId) {
             setLoadingTimes(true)
-            form.setValue('time', '')
+            setValue('time', '')
             appointmentService
                 .getAvailableTimes(watchedDate, Number(watchedJobId))
-                .then(setAvailableTimes)
+                .then(setTimes)
                 .finally(() => setLoadingTimes(false))
         }
     }, [watchedDate, watchedJobId])
@@ -62,128 +51,151 @@ export function NewAppointmentPage() {
                 date: data.date,
                 time: data.time,
             })
-            toast.success('Agendamento criado com sucesso!')
+            toast.success('Agendamento criado!')
             navigate('/appointments')
         } catch {
-            toast.error('Erro ao criar agendamento!')
+            toast.error('Erro ao criar agendamento')
         }
     }
 
     const selectedJob = jobs.find(j => j.id === Number(watchedJobId))
+    const inputStyle = {
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)', padding: '10px 12px',
+        fontSize: 14, color: 'var(--text)', width: '100%', outline: 'none',
+    }
 
     return (
-        <div className="max-w-xl">
-            <div className="bg-[#0f1117] border border-white/5 rounded-xl p-6">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                        <FormField
-                            control={form.control}
-                            name="jobId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-300">Serviço</FormLabel>
-                                    <FormControl>
-                                        <select
-                                            {...field}
-                                            className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500"
-                                        >
-                                            <option value="" className="bg-[#0f1117]">Selecione um serviço</option>
-                                            {jobs.map(job => (
-                                                <option key={job.id} value={job.id} className="bg-[#0f1117]">
-                                                    {job.name} — R$ {Number(job.price).toFixed(2)} ({job.durationMinutes}min)
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
+        <div style={{ maxWidth: 560 }}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <div style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', overflow: 'hidden',
+                }}>
+                    {/* Seção serviço */}
+                    <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{
+                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
+                            letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                        }}>
+                            1 · Serviço
+                        </div>
+                        <select {...register('jobId')} style={inputStyle}>
+                            <option value="">Selecione um serviço...</option>
+                            {jobs.map(j => (
+                                <option key={j.id} value={j.id}>
+                                    {j.name} — R$ {Number(j.price).toFixed(2)} · {j.durationMinutes}min
+                                </option>
+                            ))}
+                        </select>
+                        {errors.jobId && (
+                            <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>
+                                {errors.jobId.message}
+                            </div>
+                        )}
                         {selectedJob && (
-                            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 text-sm text-gray-400">
+                            <div style={{
+                                marginTop: 10, padding: '10px 12px',
+                                background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)',
+                                fontSize: 13, color: 'var(--text-muted)',
+                                borderLeft: '3px solid var(--accent)',
+                            }}>
                                 {selectedJob.description}
                             </div>
                         )}
+                    </div>
 
-                        <FormField
-                            control={form.control}
-                            name="date"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-300">Data</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            type="date"
-                                            min={new Date().toISOString().split('T')[0]}
-                                            className="bg-white/5 border-white/10 text-white focus:border-cyan-500"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="time"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-gray-300">Horário disponível</FormLabel>
-                                    <FormControl>
-                                        {loadingTimes ? (
-                                            <div className="h-10 bg-white/5 rounded-lg animate-pulse" />
-                                        ) : availableTimes.length === 0 ? (
-                                            <p className="text-gray-500 text-sm py-2">
-                                                {watchedDate && watchedJobId
-                                                    ? 'Nenhum horário disponível nesta data.'
-                                                    : 'Selecione um serviço e uma data.'}
-                                            </p>
-                                        ) : (
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {availableTimes.map(time => (
-                                                    <button
-                                                        key={time}
-                                                        type="button"
-                                                        onClick={() => form.setValue('time', time)}
-                                                        className={`py-2 rounded-lg text-sm font-medium transition-colors ${
-                                                            field.value === time
-                                                                ? 'bg-cyan-500 text-black'
-                                                                : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                                                        }`}
-                                                    >
-                                                        {time}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="flex gap-3 pt-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/appointments')}
-                                className="flex-1 border-white/10 text-gray-400 hover:text-white bg-transparent"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={form.formState.isSubmitting}
-                                className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
-                            >
-                                {form.formState.isSubmitting ? 'Criando...' : 'Confirmar Agendamento'}
-                            </Button>
+                    {/* Seção data */}
+                    <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{
+                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
+                            letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                        }}>
+                            2 · Data
                         </div>
-                    </form>
-                </Form>
-            </div>
+                        <input
+                            {...register('date')}
+                            type="date"
+                            min={new Date().toISOString().split('T')[0]}
+                            style={inputStyle}
+                        />
+                        {errors.date && (
+                            <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 4 }}>
+                                {errors.date.message}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Seção horário */}
+                    <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{
+                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
+                            letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                        }}>
+                            3 · Horário disponível
+                        </div>
+                        {loadingTimes ? (
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} style={{
+                                        width: 68, height: 36, background: 'var(--bg-surface)',
+                                        borderRadius: 'var(--radius-sm)',
+                                    }} />
+                                ))}
+                            </div>
+                        ) : times.length === 0 ? (
+                            <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>
+                                {watchedDate && watchedJobId
+                                    ? '😔 Nenhum horário disponível nesta data'
+                                    : 'Selecione um serviço e uma data primeiro'}
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                {times.map(t => (
+                                    <button key={t} type="button" onClick={() => setValue('time', t)} style={{
+                                        padding: '7px 14px', borderRadius: 'var(--radius-sm)',
+                                        fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                                        background: watchedTime === t ? 'var(--text)' : 'var(--bg-surface)',
+                                        color: watchedTime === t ? 'white' : 'var(--text-muted)',
+                                        border: `1px solid ${watchedTime === t ? 'var(--text)' : 'var(--border)'}`,
+                                        transition: 'all 0.12s',
+                                    }}>
+                                        {t?.slice(0, 5)}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        {errors.time && (
+                            <div style={{ fontSize: 11, color: 'var(--danger)', marginTop: 6 }}>
+                                {errors.time.message}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Ações */}
+                    <div style={{
+                        padding: '16px 24px', display: 'flex', gap: 8,
+                        justifyContent: 'flex-end',
+                    }}>
+                        <button type="button" onClick={() => navigate('/appointments')} style={{
+                            padding: '9px 18px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            background: 'var(--bg-surface)', color: 'var(--text-muted)',
+                            border: '1px solid var(--border)',
+                        }}>
+                            Cancelar
+                        </button>
+                        <button type="submit" disabled={isSubmitting} style={{
+                            padding: '9px 20px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            background: 'var(--text)', color: 'white',
+                            border: 'none', opacity: isSubmitting ? 0.6 : 1,
+                        }}>
+                            {isSubmitting ? 'Confirmando...' : 'Confirmar agendamento'}
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     )
 }

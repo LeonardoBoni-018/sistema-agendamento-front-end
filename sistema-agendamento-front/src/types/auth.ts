@@ -5,6 +5,7 @@ export interface User {
     phone: string
     comercioId: number | null
     comercioNome: string | null
+    role?: string
 }
 
 export interface LoginRequest {

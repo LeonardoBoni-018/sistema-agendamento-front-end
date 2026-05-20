@@ -1,29 +1,21 @@
 import { AppointmentStatus } from '@/types/appointment'
 
-const statusConfig: Record<AppointmentStatus, { label: string; className: string }> = {
-    PENDING: {
-        label: 'Pendente',
-        className: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-    },
-    CONFIRMED: {
-        label: 'Confirmado',
-        className: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
-    },
-    CANCELED: {
-        label: 'Cancelado',
-        className: 'bg-red-500/10 text-red-400 border border-red-500/20',
-    },
-    FINISHED: {
-        label: 'Finalizado',
-        className: 'bg-green-500/10 text-green-400 border border-green-500/20',
-    },
+const config: Record<AppointmentStatus, { label: string; bg: string; color: string }> = {
+    PENDING: { label: 'Pendente', bg: 'var(--pending-light)', color: '#92400E' },
+    CONFIRMED: { label: 'Confirmado', bg: 'var(--success-light)', color: '#065F46' },
+    CANCELED: { label: 'Cancelado', bg: 'var(--danger-light)', color: '#991B1B' },
+    FINISHED: { label: 'Finalizado', bg: 'var(--bg-surface)', color: 'var(--text-muted)' },
 }
 
 export function StatusBadge({ status }: { status: AppointmentStatus }) {
-    const config = statusConfig[status]
+    const { label, bg, color } = config[status]
     return (
-        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${config.className}`}>
-      {config.label}
+        <span style={{
+            display: 'inline-block', fontSize: 11, fontWeight: 600,
+            padding: '3px 9px', borderRadius: 20, background: bg, color,
+            letterSpacing: '0.02em',
+        }}>
+      {label}
     </span>
     )
 }

@@ -25,17 +25,8 @@ export const useAuthStore = create<AuthState>()(
             logout: () => set({ token: null, refreshToken: null, user: null }),
 
             isAdmin: () => {
-                const token = get().token
-                if (!token) return false
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]))
-                    const roles: string[] = payload.roles ?? payload.authorities ?? []
-                    return roles.some(r =>
-                        r === 'ROLE_ADMIN' || r === 'ADMIN'
-                    )
-                } catch {
-                    return false
-                }
+                const user = get().user
+                return user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN'
             },
 
             getComercioId: () => {

@@ -1,28 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { jobService } from '@/services/jobService'
 import { Job } from '@/types/job'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form'
-import { useAuthStore } from '@/store/authStore'
 
 const schema = z.object({
     name: z.string().min(1, 'Nome obrigatório'),
@@ -34,202 +16,252 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 export function JobsPage() {
-    const { isAdmin } = useAuthStore()
     const [jobs, setJobs] = useState<Job[]>([])
     const [loading, setLoading] = useState(true)
-    const [dialogOpen, setDialogOpen] = useState(false)
-    const [editingJob, setEditingJob] = useState<Job | null>(null)
+    const [showForm, setShowForm] = useState(false)
+    const [editing, setEditing] = useState<Job | null>(null)
 
-    const form = useForm<FormData>({
+    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
         resolver: zodResolver(schema),
-        defaultValues: { name: '', description: '', price: '', durationMinutes: '' },
     })
 
     const load = () => {
-        jobService.getAll()
-            .then(setJobs)
-            .finally(() => setLoading(false))
+        jobService.getAll().then(setJobs).finally(() => setLoading(false))
     }
 
     useEffect(() => { load() }, [])
 
     const openCreate = () => {
-        setEditingJob(null)
-        form.reset({ name: '', description: '', price: '', durationMinutes: '' })
-        setDialogOpen(true)
+        setEditing(null)
+        reset({ name: '', description: '', price: '', durationMinutes: '' })
+        setShowForm(true)
     }
 
     const openEdit = (job: Job) => {
-        setEditingJob(job)
-        form.reset({
+        setEditing(job)
+        reset({
             name: job.name,
             description: job.description,
             price: String(job.price),
             durationMinutes: String(job.durationMinutes),
         })
-        setDialogOpen(true)
+        setShowForm(true)
     }
 
     const onSubmit = async (data: FormData) => {
         try {
             const payload = {
-                name: data.name,
-                description: data.description,
-                price: Number(data.price),
-                durationMinutes: Number(data.durationMinutes),
+                name: data.name, description: data.description,
+                price: Number(data.price), durationMinutes: Number(data.durationMinutes),
             }
-            if (editingJob) {
-                await jobService.update(editingJob.id, payload)
-                toast.success('Serviço atualizado!')
+            if (editing) {
+                await jobService.update(editing.id, payload)
+                toast.success('Serviço atualizado')
             } else {
                 await jobService.create(payload)
-                toast.success('Serviço criado!')
+                toast.success('Serviço criado')
             }
-            setDialogOpen(false)
+            setShowForm(false)
             load()
         } catch {
-            toast.error('Erro ao salvar serviço!')
+            toast.error('Erro ao salvar serviço')
         }
     }
 
     const handleDelete = async (id: number) => {
         try {
             await jobService.delete(id)
-            toast.success('Serviço excluído!')
+            toast.success('Serviço removido')
             load()
         } catch {
-            toast.error('Não é possível excluir um serviço com agendamentos ativos!')
+            toast.error('Não é possível remover — existem agendamentos ativos')
         }
     }
 
+    const inputStyle = {
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)', padding: '9px 12px',
+        fontSize: 13, color: 'var(--text)', width: '100%', outline: 'none',
+    }
+
     return (
-        <div className="space-y-6">
-            {isAdmin() && (
-                <div className="flex justify-end">
-                    <Button
-                        onClick={openCreate}
-                        className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
-                    >
-                        <Plus size={16} className="mr-2" />
-                        Novo Serviço
-                    </Button>
+        <div style={{ maxWidth: 900 }}>
+            <div style={{
+                display: 'flex', justifyContent: 'space-between',
+                alignItems: 'center', marginBottom: 20,
+            }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                    {jobs.length} {jobs.length === 1 ? 'serviço cadastrado' : 'serviços cadastrados'}
                 </div>
-            )}
+                <button onClick={openCreate} style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                    background: 'var(--text)', color: 'white',
+                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                }}>
+                    <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                    Novo serviço
+                </button>
+            </div>
 
-            {!isAdmin() && (
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
-                    <p className="text-amber-400 text-sm">
-                        <span className="font-semibold">Acesso restrito:</span> Apenas administradores podem gerenciar serviços.
-                    </p>
-                </div>
-            )}
-
-            {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="h-36 bg-[#0f1117] rounded-xl animate-pulse border border-white/5" />
-                    ))}
-                </div>
-            ) : jobs.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-gray-500 mb-2">Nenhum serviço disponível no momento.</p>
-                    {!isAdmin() && (
-                        <p className="text-gray-600 text-sm">Entre em contato com um administrador para adicionar serviços.</p>
-                    )}
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {jobs.map(job => (
-                        <div
-                            key={job.id}
-                            className="bg-[#0f1117] border border-white/5 rounded-xl p-5 hover:border-white/10 transition-colors"
-                        >
-                            <div className="flex items-start justify-between mb-3">
-                                <h3 className="text-white font-semibold">{job.name}</h3>
-                                {isAdmin() && (
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => openEdit(job)}
-                                            className="text-gray-500 hover:text-cyan-400 transition-colors"
-                                        >
-                                            <Pencil size={15} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(job.id)}
-                                            className="text-gray-500 hover:text-red-400 transition-colors"
-                                        >
-                                            <Trash2 size={15} />
-                                        </button>
-                                    </div>
-                                )}
+            {showForm && (
+                <div style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius)', marginBottom: 16, overflow: 'hidden',
+                }}>
+                    <div style={{
+                        padding: '14px 20px', borderBottom: '1px solid var(--border)',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                            {editing ? 'Editar serviço' : 'Novo serviço'}
+                        </div>
+                        <button onClick={() => setShowForm(false)} style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: 'var(--text-muted)', fontSize: 16,
+                        }}>
+                            <i className="ti ti-x" aria-hidden="true" />
+                        </button>
+                    </div>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <div style={{
+                            display: 'grid', gridTemplateColumns: '1fr 1fr',
+                            gap: 12, padding: '20px',
+                        }}>
+                            <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nome</label>
+                                <input {...register('name')} placeholder="Ex: Corte masculino" style={inputStyle} />
+                                {errors.name && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.name.message}</span>}
                             </div>
-                            <p className="text-gray-500 text-sm mb-4 line-clamp-2">{job.description}</p>
-                            <div className="flex items-center justify-between">
-                <span className="text-cyan-400 font-semibold">
-                  R$ {Number(job.price).toFixed(2)}
-                </span>
-                                <span className="text-gray-500 text-xs">
-                  {job.durationMinutes} min
-                </span>
+                            <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Descrição</label>
+                                <input {...register('description')} placeholder="Descreva o serviço" style={inputStyle} />
+                                {errors.description && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.description.message}</span>}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Preço (R$)</label>
+                                <input {...register('price')} type="number" step="0.01" placeholder="0,00" style={inputStyle} />
+                                {errors.price && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.price.message}</span>}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Duração (min)</label>
+                                <input {...register('durationMinutes')} type="number" placeholder="30" style={inputStyle} />
+                                {errors.durationMinutes && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.durationMinutes.message}</span>}
                             </div>
                         </div>
-                    ))}
+                        <div style={{
+                            padding: '12px 20px', borderTop: '1px solid var(--border)',
+                            display: 'flex', gap: 8, justifyContent: 'flex-end',
+                        }}>
+                            <button type="button" onClick={() => setShowForm(false)} style={{
+                                padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                background: 'var(--bg-surface)', color: 'var(--text-muted)',
+                                border: '1px solid var(--border)',
+                            }}>
+                                Cancelar
+                            </button>
+                            <button type="submit" disabled={isSubmitting} style={{
+                                padding: '8px 18px', borderRadius: 'var(--radius-sm)',
+                                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                background: 'var(--text)', color: 'white',
+                                border: 'none', opacity: isSubmitting ? 0.6 : 1,
+                            }}>
+                                {isSubmitting ? 'Salvando...' : 'Salvar'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
 
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="bg-[#0f1117] border-white/10 text-white">
-                    <DialogHeader>
-                        <DialogTitle>{editingJob ? 'Editar Serviço' : 'Novo Serviço'}</DialogTitle>
-                    </DialogHeader>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            {(['name', 'description', 'price', 'durationMinutes'] as const).map((fieldName) => (
-                                <FormField
-                                    key={fieldName}
-                                    control={form.control}
-                                    name={fieldName}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-gray-300">
-                                                {fieldName === 'name' ? 'Nome'
-                                                    : fieldName === 'description' ? 'Descrição'
-                                                        : fieldName === 'price' ? 'Preço (R$)'
-                                                            : 'Duração (minutos)'}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    type={fieldName === 'price' || fieldName === 'durationMinutes' ? 'number' : 'text'}
-                                                    className="bg-white/5 border-white/10 text-white focus:border-cyan-500"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            ))}
-                            <div className="flex gap-3 pt-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setDialogOpen(false)}
-                                    className="flex-1 border-white/10 text-gray-400 bg-transparent"
-                                >
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={form.formState.isSubmitting}
-                                    className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
-                                >
-                                    {form.formState.isSubmitting ? 'Salvando...' : 'Salvar'}
-                                </Button>
+            <div style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)', overflow: 'hidden',
+            }}>
+                {loading ? (
+                    <div style={{ padding: 20 }}>
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} style={{
+                                height: 64, background: 'var(--bg-surface)',
+                                borderRadius: 'var(--radius-sm)', marginBottom: 8,
+                            }} />
+                        ))}
+                    </div>
+                ) : jobs.length === 0 ? (
+                    <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+                        <div style={{ fontSize: 36, marginBottom: 10 }}>✂️</div>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                            Nenhum serviço cadastrado
+                        </div>
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+                            Adicione os serviços que seu comércio oferece
+                        </div>
+                        <button onClick={openCreate} style={{
+                            padding: '9px 20px', borderRadius: 'var(--radius-sm)',
+                            background: 'var(--text)', color: 'white',
+                            fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                        }}>
+                            Criar primeiro serviço
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{
+                            display: 'grid', gridTemplateColumns: '2fr 3fr 90px 80px 80px',
+                            padding: '10px 20px', borderBottom: '1px solid var(--border)',
+                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
+                            letterSpacing: '0.06em', textTransform: 'uppercase',
+                        }}>
+                            <span>Nome</span>
+                            <span>Descrição</span>
+                            <span>Valor</span>
+                            <span>Duração</span>
+                            <span></span>
+                        </div>
+                        {jobs.map((job, idx) => (
+                            <div key={job.id} style={{
+                                display: 'grid', gridTemplateColumns: '2fr 3fr 90px 80px 80px',
+                                padding: '14px 20px', alignItems: 'center',
+                                borderBottom: idx < jobs.length - 1 ? '1px solid var(--border)' : 'none',
+                                transition: 'background 0.1s',
+                            }}
+                                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
+                                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                            >
+                                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                    {job.name}
+                                </div>
+                                <div style={{
+                                    fontSize: 13, color: 'var(--text-muted)',
+                                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                }}>
+                                    {job.description}
+                                </div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                    R$ {Number(job.price).toFixed(2)}
+                                </div>
+                                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                                    {job.durationMinutes}min
+                                </div>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <button onClick={() => openEdit(job)} style={{
+                                        background: 'none', border: 'none', cursor: 'pointer',
+                                        color: 'var(--text-muted)', fontSize: 15, padding: 2,
+                                    }}>
+                                        <i className="ti ti-edit" aria-hidden="true" />
+                                    </button>
+                                    <button onClick={() => handleDelete(job.id)} style={{
+                                        background: 'none', border: 'none', cursor: 'pointer',
+                                        color: 'var(--danger)', fontSize: 15, padding: 2,
+                                    }}>
+                                        <i className="ti ti-trash" aria-hidden="true" />
+                                    </button>
+                                </div>
                             </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+                        ))}
+                    </>
+                )}
+            </div>
         </div>
     )
 }

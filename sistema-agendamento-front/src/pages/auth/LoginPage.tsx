@@ -9,11 +9,6 @@ import { comercioService } from '@/services/comercioService'
 import { useAuthStore } from '@/store/authStore'
 import { userService } from '@/services/userService'
 import { Comercio } from '@/types/comercio'
-import { Button } from 'src/components/ui/button'
-import { Input } from 'src/components/ui/input'
-import {
-    Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
-} from 'src/components/ui/form'
 
 const loginSchema = z.object({
     email: z.string().email('Email inválido'),
@@ -30,6 +25,22 @@ const registerSchema = z.object({
 
 type LoginData = z.infer<typeof loginSchema>
 type RegisterData = z.infer<typeof registerSchema>
+
+function Field({
+                   label, error, children,
+               }: {
+    label: string; error?: string; children: React.ReactNode
+}) {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
+                {label.toUpperCase()}
+            </label>
+            {children}
+            {error && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{error}</span>}
+        </div>
+    )
+}
 
 export function LoginPage() {
     const navigate = useNavigate()
@@ -57,273 +68,191 @@ export function LoginPage() {
             setAuth(response.accessToken, response.refreshToken)
             const user = await userService.getMyProfile()
             setUser(user)
-            toast.success('Login realizado com sucesso!')
             navigate('/dashboard')
         } catch {
-            toast.error('Email ou senha inválidos!')
+            toast.error('Email ou senha inválidos')
         }
     }
 
     const onRegister = async (data: RegisterData) => {
         try {
-            await authService.register({
-                ...data,
-                comercioId: Number(data.comercioId),
-            })
-            toast.success('Conta criada! Faça login para continuar.')
+            await authService.register({ ...data, comercioId: Number(data.comercioId) })
+            toast.success('Conta criada! Entre para continuar.')
             registerForm.reset()
             setTab('login')
         } catch {
-            toast.error('Erro ao criar conta. Email já cadastrado?')
+            toast.error('Erro ao criar conta')
         }
     }
 
-    return (
-        <div className="min-h-screen w-full bg-[#13151a] flex">
-            {/* Lado esquerdo */}
-            <div className="hidden lg:flex flex-1 flex-col justify-between p-12 bg-[#0f1117] border-r border-white/5">
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
-                        S.
-                    </div>
-                    <span className="text-white font-semibold">Sistema Agendamento</span>
-                </div>
+    const inputStyle = {
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        padding: '10px 12px',
+        fontSize: 14,
+        color: 'var(--text)',
+        width: '100%',
+        outline: 'none',
+    }
 
-                <div>
-                    <div className="space-y-6 mb-12">
-                        {[
-                            { icon: '📅', text: 'Agende serviços com facilidade' },
-                            { icon: '✅', text: 'Acompanhe seus agendamentos em tempo real' },
-                            { icon: '🔔', text: 'Receba confirmações instantâneas' },
-                        ].map(({ icon, text }) => (
-                            <div key={text} className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-lg">
-                                    {icon}
-                                </div>
-                                <p className="text-gray-300 text-sm">{text}</p>
-                            </div>
-                        ))}
+    return (
+        <div style={{
+            minHeight: '100vh', display: 'flex', background: 'var(--bg)',
+        }}>
+            {/* Painel esquerdo */}
+            <div style={{
+                flex: 1, display: 'none', flexDirection: 'column',
+                justifyContent: 'space-between', padding: 48,
+                background: 'var(--text)', position: 'relative', overflow: 'hidden',
+            }} className="login-left">
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 8,
+                        background: 'rgba(255,255,255,0.08)', borderRadius: 8,
+                        padding: '6px 12px', marginBottom: 48,
+                    }}>
+                        <div style={{
+                            width: 20, height: 20, background: 'var(--accent)',
+                            borderRadius: 4, flexShrink: 0,
+                        }} />
+                        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
+              Sistema de Agendamento
+            </span>
                     </div>
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                        <p className="text-gray-400 text-sm italic mb-4">
-                            "Sistema muito prático, facilitou muito o gerenciamento dos nossos agendamentos!"
-                        </p>
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs font-bold">
-                                A
-                            </div>
-                            <div>
-                                <p className="text-white text-xs font-medium">Admin</p>
-                                <p className="text-gray-500 text-xs">Gestor do sistema</p>
-                            </div>
-                        </div>
+                    <div style={{ fontSize: 36, fontWeight: 500, color: 'white', lineHeight: 1.2, marginBottom: 16 }}>
+                        Organize sua agenda.<br />Cresça seu negócio.
+                    </div>
+                    <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
+                        Gerencie agendamentos, clientes e serviços em um só lugar.
                     </div>
                 </div>
-                <p className="text-gray-600 text-xs">© 2025 Sistema Agendamento</p>
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    {[
+                        { num: '2.4k', label: 'Agendamentos gerenciados' },
+                        { num: '98%', label: 'Satisfação dos clientes' },
+                        { num: '12min', label: 'Economizado por agendamento' },
+                    ].map(({ num, label }) => (
+                        <div key={label} style={{
+                            display: 'flex', alignItems: 'center', gap: 16,
+                            padding: '14px 0',
+                            borderTop: '1px solid rgba(255,255,255,0.08)',
+                        }}>
+                            <div style={{ fontSize: 22, fontWeight: 500, color: 'var(--accent)', minWidth: 52 }}>
+                                {num}
+                            </div>
+                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{label}</div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            {/* Lado direito */}
-            <div className="flex-1 flex items-center justify-center p-6">
-                <div className="w-full max-w-md">
-                    <div className="flex items-center gap-3 justify-center mb-8 lg:hidden">
-                        <div className="w-9 h-9 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-black text-sm">
-                            S.
+            {/* Painel direito */}
+            <div style={{
+                flex: 1, display: 'flex', alignItems: 'center',
+                justifyContent: 'center', padding: 24,
+            }}>
+                <div style={{ width: '100%', maxWidth: 400 }}>
+                    <div style={{ marginBottom: 32 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+                            <div style={{
+                                width: 28, height: 28, background: 'var(--accent)',
+                                borderRadius: 6, flexShrink: 0,
+                            }} />
+                            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                Sistema de Agendamento
+              </span>
                         </div>
-                        <span className="text-white font-semibold">Sistema Agendamento</span>
+                        <div style={{ fontSize: 24, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>
+                            {tab === 'login' ? 'Bem-vindo de volta' : 'Criar uma conta'}
+                        </div>
+                        <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
+                            {tab === 'login'
+                                ? 'Entre com seus dados para continuar'
+                                : 'Preencha os campos para se cadastrar'}
+                        </div>
                     </div>
 
-                    <div className="flex bg-white/5 border border-white/10 rounded-xl p-1 mb-6">
-                        <button
-                            onClick={() => setTab('login')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                tab === 'login'
-                                    ? 'bg-cyan-500 text-black'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            Entrar
-                        </button>
-                        <button
-                            onClick={() => setTab('register')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                tab === 'register'
-                                    ? 'bg-cyan-500 text-black'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            Criar conta
-                        </button>
+                    {/* Tabs */}
+                    <div style={{
+                        display: 'flex', background: 'var(--bg-surface)',
+                        borderRadius: 'var(--radius-sm)', padding: 3,
+                        marginBottom: 24, border: '1px solid var(--border)',
+                    }}>
+                        {(['login', 'register'] as const).map(t => (
+                            <button key={t} onClick={() => setTab(t)} style={{
+                                flex: 1, padding: '7px 0', borderRadius: 5,
+                                fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                                background: tab === t ? 'var(--bg-card)' : 'transparent',
+                                color: tab === t ? 'var(--text)' : 'var(--text-muted)',
+                                border: tab === t ? '1px solid var(--border)' : '1px solid transparent',
+                                transition: 'all 0.15s',
+                            }}>
+                                {t === 'login' ? 'Entrar' : 'Criar conta'}
+                            </button>
+                        ))}
                     </div>
 
-                    <div className="bg-[#0f1117] border border-white/5 rounded-2xl p-8">
-                        {tab === 'login' ? (
-                            <>
-                                <h2 className="text-white text-2xl font-semibold mb-1">
-                                    Bem-vindo de volta
-                                </h2>
-                                <p className="text-gray-400 text-sm mb-6">
-                                    Entre com suas credenciais para continuar
-                                </p>
-                                <Form {...loginForm}>
-                                    <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
-                                        <FormField
-                                            control={loginForm.control}
-                                            name="email"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Email</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                            placeholder="seu@email.com"
-                                                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500"
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={loginForm.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Senha</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                            type="password"
-                                                            placeholder="••••••••"
-                                                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500"
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <Button
-                                            type="submit"
-                                            disabled={loginForm.formState.isSubmitting}
-                                            className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold mt-2"
-                                        >
-                                            {loginForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
-                                        </Button>
-                                    </form>
-                                </Form>
-                                <p className="text-center text-gray-500 text-xs mt-4">
-                                    Não tem uma conta?{' '}
-                                    <button onClick={() => setTab('register')} className="text-cyan-400 hover:text-cyan-300">
-                                        Criar conta
-                                    </button>
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <h2 className="text-white text-2xl font-semibold mb-1">Criar conta</h2>
-                                <p className="text-gray-400 text-sm mb-6">Preencha os dados para se cadastrar</p>
-                                <Form {...registerForm}>
-                                    <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                                        <FormField
-                                            control={registerForm.control}
-                                            name="name"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Nome</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} placeholder="Seu nome completo"
-                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={registerForm.control}
-                                            name="email"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Email</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} placeholder="seu@email.com"
-                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={registerForm.control}
-                                            name="phone"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Telefone</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} placeholder="(11) 99999-9999"
-                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={registerForm.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Senha</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} type="password" placeholder="••••••••"
-                                                               className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-cyan-500" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                    {tab === 'login' ? (
+                        <form onSubmit={loginForm.handleSubmit(onLogin)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                            <Field label="Email" error={loginForm.formState.errors.email?.message}>
+                                <input {...loginForm.register('email')} placeholder="seu@email.com" style={inputStyle} />
+                            </Field>
+                            <Field label="Senha" error={loginForm.formState.errors.password?.message}>
+                                <input {...loginForm.register('password')} type="password" placeholder="••••••••" style={inputStyle} />
+                            </Field>
+                            <button type="submit" disabled={loginForm.formState.isSubmitting} style={{
+                                padding: '11px', borderRadius: 'var(--radius-sm)',
+                                background: 'var(--text)', color: 'white',
+                                fontSize: 14, fontWeight: 600, border: 'none',
+                                cursor: 'pointer', marginTop: 4, transition: 'opacity 0.15s',
+                                opacity: loginForm.formState.isSubmitting ? 0.6 : 1,
+                            }}>
+                                {loginForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={registerForm.handleSubmit(onRegister)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                            <Field label="Nome completo" error={registerForm.formState.errors.name?.message}>
+                                <input {...registerForm.register('name')} placeholder="Seu nome" style={inputStyle} />
+                            </Field>
+                            <Field label="Email" error={registerForm.formState.errors.email?.message}>
+                                <input {...registerForm.register('email')} placeholder="seu@email.com" style={inputStyle} />
+                            </Field>
+                            <Field label="Telefone" error={registerForm.formState.errors.phone?.message}>
+                                <input {...registerForm.register('phone')} placeholder="(11) 99999-9999" style={inputStyle} />
+                            </Field>
+                            <Field label="Senha" error={registerForm.formState.errors.password?.message}>
+                                <input {...registerForm.register('password')} type="password" placeholder="••••••••" style={inputStyle} />
+                            </Field>
+                            <Field label="Comércio" error={registerForm.formState.errors.comercioId?.message}>
+                                <select {...registerForm.register('comercioId')} style={inputStyle}>
+                                    <option value="">Selecione um comércio</option>
+                                    {comercios.map(c => (
+                                        <option key={c.id} value={c.id}>{c.nome}</option>
+                                    ))}
+                                </select>
+                            </Field>
+                            <button type="submit" disabled={registerForm.formState.isSubmitting} style={{
+                                padding: '11px', borderRadius: 'var(--radius-sm)',
+                                background: 'var(--text)', color: 'white',
+                                fontSize: 14, fontWeight: 600, border: 'none',
+                                cursor: 'pointer', marginTop: 4,
+                                opacity: registerForm.formState.isSubmitting ? 0.6 : 1,
+                            }}>
+                                {registerForm.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
+                            </button>
+                        </form>
+                    )}
 
-                                        {/* ✅ Select de comércio */}
-                                        <FormField
-                                            control={registerForm.control}
-                                            name="comercioId"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-gray-300">Comércio</FormLabel>
-                                                    <FormControl>
-                                                        <select
-                                                            {...field}
-                                                            className="w-full bg-white/5 border border-white/10 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500"
-                                                        >
-                                                            <option value="" className="bg-[#0f1117]">
-                                                                Selecione um comércio
-                                                            </option>
-                                                            {comercios.map((c) => (
-                                                                <option key={c.id} value={c.id} className="bg-[#0f1117]">
-                                                                    {c.nome}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <Button
-                                            type="submit"
-                                            disabled={registerForm.formState.isSubmitting}
-                                            className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold mt-2"
-                                        >
-                                            {registerForm.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
-                                        </Button>
-                                    </form>
-                                </Form>
-                                <p className="text-center text-gray-500 text-xs mt-4">
-                                    Já tem uma conta?{' '}
-                                    <button onClick={() => setTab('login')} className="text-cyan-400 hover:text-cyan-300">
-                                        Entrar
-                                    </button>
-                                </p>
-                            </>
-                        )}
+                    <div style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'var(--text-muted)' }}>
+                        {tab === 'login' ? 'Não tem conta?' : 'Já tem conta?'}{' '}
+                        <button onClick={() => setTab(tab === 'login' ? 'register' : 'login')} style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: 'var(--accent-dark)', fontWeight: 600, fontSize: 13,
+                        }}>
+                            {tab === 'login' ? 'Criar conta' : 'Entrar'}
+                        </button>
                     </div>
                 </div>
             </div>

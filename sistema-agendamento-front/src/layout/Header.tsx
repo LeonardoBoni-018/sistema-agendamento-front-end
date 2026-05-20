@@ -1,25 +1,31 @@
-import { useAuthStore } from '@/store/authStore'
-import { Bell } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 
-interface HeaderProps {
-    title: string
+const pageTitles: Record<string, { title: string; desc: string }> = {
+    '/dashboard': { title: 'Início', desc: 'Visão geral dos agendamentos' },
+    '/appointments': { title: 'Meus agendamentos', desc: 'Histórico e próximos horários' },
+    '/appointments/new': { title: 'Novo agendamento', desc: 'Escolha um serviço e horário' },
+    '/jobs': { title: 'Serviços', desc: 'Gerencie os serviços do comércio' },
+    '/admin/appointments': { title: 'Todos os agendamentos', desc: 'Visão completa do comércio' },
+    '/profile': { title: 'Perfil', desc: 'Suas informações pessoais' },
 }
 
-export function Header({ title }: HeaderProps) {
-    const { user } = useAuthStore()
+export function Header() {
+    const location = useLocation()
+    const page = pageTitles[location.pathname] ?? { title: 'Sistema', desc: '' }
 
     return (
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6">
-            <h1 className="text-white text-xl font-semibold">{title}</h1>
-            <div className="flex items-center gap-4">
-                <button className="text-gray-400 hover:text-white transition-colors relative">
-                    <Bell size={20} />
-                </button>
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs font-bold">
-                        {user?.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-white text-sm">{user?.name}</span>
+        <header style={{
+            height: 60, borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center',
+            padding: '0 28px', background: 'var(--bg-card)',
+            gap: 12,
+        }}>
+            <div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', lineHeight: 1.2 }}>
+                    {page.title}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
+                    {page.desc}
                 </div>
             </div>
         </header>

@@ -1,35 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Calendar, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { useAuthStore } from '@/store/authStore'
-import { format } from 'date-fns'
+import { format, isToday, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-function StatCard({
-                      title, value, icon, color,
-                  }: {
-    title: string
-    value: number
-    icon: React.ReactNode
-    color: string
-}) {
+function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
     return (
-        <div className="bg-[#0f1117] border border-white/5 rounded-xl p-5 flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-                {icon}
+        <div style={{
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)', padding: '16px 20px',
+        }}>
+            <div style={{ fontSize: 28, fontWeight: 500, color: color ?? 'var(--text)' }}>
+                {value}
             </div>
-            <div>
-                <p className="text-gray-400 text-sm">{title}</p>
-                <p className="text-white text-2xl font-semibold">{value}</p>
-            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
         </div>
     )
 }
 
 export function DashboardPage() {
     const { isAdmin, user } = useAuthStore()
+    const navigate = useNavigate()
     const admin = isAdmin()
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
@@ -38,125 +32,134 @@ export function DashboardPage() {
         const load = admin
             ? appointmentService.getAllAppointments()
             : appointmentService.myAppointments()
-
         load.then(setAppointments).finally(() => setLoading(false))
     }, [admin])
 
+    const todayAppointments = appointments.filter(a => {
+        try { return isToday(parseISO(a.date)) } catch { return false }
+    })
     const pending = appointments.filter(a => a.status === 'PENDING').length
     const confirmed = appointments.filter(a => a.status === 'CONFIRMED').length
     const canceled = appointments.filter(a => a.status === 'CANCELED').length
-    const finished = appointments.filter(a => a.status === 'FINISHED').length
 
     const upcoming = appointments
         .filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED')
-        .slice(0, 5)
+        .slice(0, 6)
+
+    const hour = new Date().getHours()
+    const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
 
     return (
-        <div className="space-y-6">
-            {/* Saudação */}
-            <div>
-                <h2 className="text-white text-lg font-semibold">
-                    Olá, {user?.name?.split(' ')[0]} 👋
-                </h2>
-                <p className="text-gray-500 text-sm">
-                    {admin
-                        ? `Visão geral do comércio ${user?.comercioNome}`
-                        : `Seus agendamentos em ${user?.comercioNome}`}
-                </p>
+        <div style={{ maxWidth: 900 }}>
+            <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 22, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>
+                    {greeting}, {user?.name?.split(' ')[0]} ✦
+                </div>
+                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
+                    {format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR })} · {user?.comercioNome}
+                </div>
             </div>
 
-            {/* Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                    title="Total"
-                    value={appointments.length}
-                    icon={<Calendar size={22} className="text-cyan-400" />}
-                    color="bg-cyan-500/10"
-                />
-                <StatCard
-                    title="Confirmados"
-                    value={confirmed}
-                    icon={<CheckCircle size={22} className="text-green-400" />}
-                    color="bg-green-500/10"
-                />
-                <StatCard
-                    title="Pendentes"
-                    value={pending}
-                    icon={<Clock size={22} className="text-yellow-400" />}
-                    color="bg-yellow-500/10"
-                />
-                <StatCard
-                    title="Cancelados"
-                    value={canceled}
-                    icon={<XCircle size={22} className="text-red-400" />}
-                    color="bg-red-500/10"
-                />
+            <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: 12, marginBottom: 28,
+            }}>
+                <Stat label="Hoje" value={todayAppointments.length} />
+                <Stat label="Confirmados" value={confirmed} color="var(--success)" />
+                <Stat label="Pendentes" value={pending} color="var(--pending)" />
+                <Stat label="Cancelados" value={canceled} color="var(--danger)" />
             </div>
 
-            {/* Tabela próximos */}
-            <div className="bg-[#0f1117] border border-white/5 rounded-xl p-6">
-                <h2 className="text-white font-semibold mb-4">
-                    {admin ? 'Próximos Agendamentos do Comércio' : 'Meus Próximos Agendamentos'}
-                </h2>
+            <div style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)', overflow: 'hidden',
+            }}>
+                <div style={{
+                    padding: '16px 20px', borderBottom: '1px solid var(--border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                    <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                            {admin ? 'Próximos agendamentos' : 'Meus próximos horários'}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 1 }}>
+                            Pendentes e confirmados
+                        </div>
+                    </div>
+                    {!admin && (
+                        <button onClick={() => navigate('/appointments/new')} style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            padding: '7px 14px', borderRadius: 'var(--radius-sm)',
+                            background: 'var(--text)', color: 'white',
+                            fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer',
+                        }}>
+                            <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                            Agendar
+                        </button>
+                    )}
+                </div>
 
                 {loading ? (
-                    <div className="space-y-3">
+                    <div style={{ padding: 20 }}>
                         {[...Array(3)].map((_, i) => (
-                            <div key={i} className="h-12 bg-white/5 rounded-lg animate-pulse" />
+                            <div key={i} style={{
+                                height: 48, background: 'var(--bg-surface)',
+                                borderRadius: 'var(--radius-sm)', marginBottom: 8,
+                                animation: 'pulse 1.5s infinite',
+                            }} />
                         ))}
                     </div>
                 ) : upcoming.length === 0 ? (
-                    <p className="text-gray-500 text-sm">Nenhum agendamento próximo.</p>
+                    <div style={{ padding: '48px 20px', textAlign: 'center' }}>
+                        <div style={{ fontSize: 32, marginBottom: 8 }}>📅</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
+                            Nenhum agendamento próximo
+                        </div>
+                        {!admin && (
+                            <button onClick={() => navigate('/appointments/new')} style={{
+                                marginTop: 12, padding: '8px 20px',
+                                borderRadius: 'var(--radius-sm)', background: 'var(--text)',
+                                color: 'white', fontSize: 13, fontWeight: 600,
+                                border: 'none', cursor: 'pointer',
+                            }}>
+                                Criar agendamento
+                            </button>
+                        )}
+                    </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                            <tr className="text-gray-500 border-b border-white/5">
-                                {admin && <th className="text-left pb-3 font-medium">Cliente</th>}
-                                <th className="text-left pb-3 font-medium">Serviço</th>
-                                <th className="text-left pb-3 font-medium">Data</th>
-                                <th className="text-left pb-3 font-medium">Horário</th>
-                                <th className="text-left pb-3 font-medium">Status</th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                            {upcoming.map((a) => (
-                                <tr key={a.id}>
-                                    {admin && (
-                                        <td className="py-3 text-gray-400">{a.userName}</td>
-                                    )}
-                                    <td className="py-3 text-white">{a.jobName}</td>
-                                    <td className="py-3 text-gray-400">
-                                        {format(new Date(a.date), 'dd MMM yyyy', { locale: ptBR })}
-                                    </td>
-                                    <td className="py-3 text-gray-400">{a.time}</td>
-                                    <td className="py-3">
-                                        <StatusBadge status={a.status} />
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                    <div>
+                        {upcoming.map((a, idx) => (
+                            <div key={a.id} style={{
+                                display: 'flex', alignItems: 'center', gap: 16,
+                                padding: '14px 20px',
+                                borderBottom: idx < upcoming.length - 1 ? '1px solid var(--border)' : 'none',
+                            }}>
+                                <div style={{
+                                    minWidth: 44, fontSize: 13, fontWeight: 600,
+                                    color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums',
+                                }}>
+                                    {a.time?.slice(0, 5)}
+                                </div>
+                                <div style={{
+                                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                                    background: a.status === 'CONFIRMED' ? 'var(--success)' : 'var(--pending)',
+                                }} />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{
+                                        fontSize: 13, fontWeight: 600, color: 'var(--text)',
+                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    }}>
+                                        {admin ? a.userName : a.jobName}
+                                    </div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
+                                        {admin ? a.jobName : format(parseISO(a.date), "dd 'de' MMM", { locale: ptBR })}
+                                    </div>
+                                </div>
+                                <StatusBadge status={a.status} />
+                            </div>
+                        ))}
                     </div>
                 )}
-            </div>
-
-            {/* Resumo */}
-            <div className="bg-[#0f1117] border border-white/5 rounded-xl p-6">
-                <h2 className="text-white font-semibold mb-4">Resumo</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                    {[
-                        { label: 'Total', value: appointments.length, color: 'text-white' },
-                        { label: 'Finalizados', value: finished, color: 'text-green-400' },
-                        { label: 'Pendentes', value: pending, color: 'text-yellow-400' },
-                        { label: 'Cancelados', value: canceled, color: 'text-red-400' },
-                    ].map(({ label, value, color }) => (
-                        <div key={label} className="bg-white/5 rounded-xl p-4">
-                            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                            <p className="text-gray-500 text-xs mt-1">{label}</p>
-                        </div>
-                    ))}
-                </div>
             </div>
         </div>
     )

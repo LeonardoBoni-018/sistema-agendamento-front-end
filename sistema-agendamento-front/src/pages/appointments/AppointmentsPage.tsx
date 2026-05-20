@@ -1,138 +1,171 @@
 import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment, AppointmentStatus } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Button } from 'src/components/ui/button'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-const STATUS_LABELS: Record<string, string> = {
-    '': 'Todos',
-    PENDING: 'Pendentes',
-    CONFIRMED: 'Confirmados',
-    CANCELED: 'Cancelados',
-    FINISHED: 'Finalizados',
-}
+const FILTERS = [
+    { value: '', label: 'Todos' },
+    { value: 'PENDING', label: 'Pendentes' },
+    { value: 'CONFIRMED', label: 'Confirmados' },
+    { value: 'CANCELED', label: 'Cancelados' },
+    { value: 'FINISHED', label: 'Finalizados' },
+]
 
 export function AppointmentsPage() {
     const navigate = useNavigate()
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
-    const [filterStatus, setFilterStatus] = useState<AppointmentStatus | ''>('')
+    const [filter, setFilter] = useState<AppointmentStatus | ''>('')
 
     const load = async () => {
         setLoading(true)
         try {
-            const data = await appointmentService.myAppointments(
-                filterStatus || undefined
-            )
+            const data = await appointmentService.myAppointments(filter || undefined)
             setAppointments(data)
         } catch {
-            toast.error('Erro ao carregar agendamentos!')
+            toast.error('Erro ao carregar agendamentos')
         } finally {
             setLoading(false)
         }
     }
 
-    useEffect(() => { load() }, [filterStatus])
+    useEffect(() => { load() }, [filter])
 
     const handleCancel = async (id: number) => {
         try {
             await appointmentService.cancel(id)
-            toast.success('Agendamento cancelado!')
+            toast.success('Agendamento cancelado')
             load()
         } catch {
-            toast.error('Erro ao cancelar agendamento!')
+            toast.error('Erro ao cancelar')
         }
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex gap-2 flex-wrap">
-                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                        <button
-                            key={value}
-                            onClick={() => setFilterStatus(value as AppointmentStatus | '')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                filterStatus === value
-                                    ? 'bg-cyan-500 text-black'
-                                    : 'bg-white/5 text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            {label}
+        <div style={{ maxWidth: 900 }}>
+            <div style={{
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between', marginBottom: 20, gap: 12,
+            }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {FILTERS.map(f => (
+                        <button key={f.value} onClick={() => setFilter(f.value as AppointmentStatus | '')} style={{
+                            padding: '6px 14px', borderRadius: 20,
+                            fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                            background: filter === f.value ? 'var(--text)' : 'var(--bg-card)',
+                            color: filter === f.value ? 'white' : 'var(--text-muted)',
+                            border: `1px solid ${filter === f.value ? 'var(--text)' : 'var(--border)'}`,
+                            transition: 'all 0.15s',
+                        }}>
+                            {f.label}
                         </button>
                     ))}
                 </div>
-                <Button
-                    onClick={() => navigate('/appointments/new')}
-                    className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
-                >
-                    <Plus size={16} className="mr-2" />
-                    Novo Agendamento
-                </Button>
+                <button onClick={() => navigate('/appointments/new')} style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                    background: 'var(--text)', color: 'white',
+                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    flexShrink: 0,
+                }}>
+                    <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                    Novo agendamento
+                </button>
             </div>
 
-            <div className="bg-[#0f1117] border border-white/5 rounded-xl overflow-hidden">
+            <div style={{
+                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)', overflow: 'hidden',
+            }}>
                 {loading ? (
-                    <div className="p-6 space-y-3">
+                    <div style={{ padding: 20 }}>
                         {[...Array(4)].map((_, i) => (
-                            <div key={i} className="h-14 bg-white/5 rounded-lg animate-pulse" />
+                            <div key={i} style={{
+                                height: 56, background: 'var(--bg-surface)',
+                                borderRadius: 'var(--radius-sm)', marginBottom: 8,
+                            }} />
                         ))}
                     </div>
                 ) : appointments.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <p className="text-gray-500">Nenhum agendamento encontrado.</p>
-                        <Button
-                            onClick={() => navigate('/appointments/new')}
-                            className="mt-4 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold"
-                        >
-                            Criar primeiro agendamento
-                        </Button>
+                    <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+                        <div style={{ fontSize: 36, marginBottom: 10 }}>🗓</div>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                            Nenhum agendamento encontrado
+                        </div>
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+                            Que tal criar seu primeiro agendamento?
+                        </div>
+                        <button onClick={() => navigate('/appointments/new')} style={{
+                            padding: '9px 20px', borderRadius: 'var(--radius-sm)',
+                            background: 'var(--text)', color: 'white',
+                            fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                        }}>
+                            Criar agendamento
+                        </button>
                     </div>
                 ) : (
-                    <table className="w-full text-sm">
-                        <thead className="border-b border-white/5">
-                        <tr className="text-gray-500">
-                            <th className="text-left p-4 font-medium">Serviço</th>
-                            <th className="text-left p-4 font-medium">Data</th>
-                            <th className="text-left p-4 font-medium">Horário</th>
-                            <th className="text-left p-4 font-medium">Valor</th>
-                            <th className="text-left p-4 font-medium">Status</th>
-                            <th className="text-left p-4 font-medium">Ações</th>
-                        </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                        {appointments.map((a) => (
-                            <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
-                                <td className="p-4 text-white font-medium">{a.jobName}</td>
-                                <td className="p-4 text-gray-400">
-                                    {format(new Date(a.date), 'dd MMM yyyy', { locale: ptBR })}
-                                </td>
-                                <td className="p-4 text-gray-400">{a.time}</td>
-                                <td className="p-4 text-gray-400">
+                    <>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '2fr 1fr 80px 90px 110px 80px',
+                            padding: '10px 20px', borderBottom: '1px solid var(--border)',
+                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
+                            letterSpacing: '0.06em', textTransform: 'uppercase',
+                        }}>
+                            <span>Serviço</span>
+                            <span>Data</span>
+                            <span>Horário</span>
+                            <span>Valor</span>
+                            <span>Status</span>
+                            <span></span>
+                        </div>
+                        {appointments.map((a, idx) => (
+                            <div key={a.id} style={{
+                                display: 'grid',
+                                gridTemplateColumns: '2fr 1fr 80px 90px 110px 80px',
+                                padding: '14px 20px', alignItems: 'center',
+                                borderBottom: idx < appointments.length - 1 ? '1px solid var(--border)' : 'none',
+                                transition: 'background 0.1s',
+                            }}
+                                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
+                                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                            >
+                                <div>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                        {a.jobName}
+                                    </div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                                        {a.jobDurationMinutes}min
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                                    {format(parseISO(a.date), "dd MMM yy", { locale: ptBR })}
+                                </div>
+                                <div style={{ fontSize: 13, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+                                    {a.time?.slice(0, 5)}
+                                </div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
                                     R$ {Number(a.jobPrice).toFixed(2)}
-                                </td>
-                                <td className="p-4">
-                                    <StatusBadge status={a.status} />
-                                </td>
-                                <td className="p-4">
+                                </div>
+                                <StatusBadge status={a.status} />
+                                <div>
                                     {(a.status === 'PENDING' || a.status === 'CONFIRMED') && (
-                                        <button
-                                            onClick={() => handleCancel(a.id)}
-                                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                                        >
+                                        <button onClick={() => handleCancel(a.id)} style={{
+                                            fontSize: 11, fontWeight: 600, color: 'var(--danger)',
+                                            background: 'none', border: 'none', cursor: 'pointer',
+                                            padding: '4px 0',
+                                        }}>
                                             Cancelar
                                         </button>
                                     )}
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
                         ))}
-                        </tbody>
-                    </table>
+                    </>
                 )}
             </div>
         </div>
