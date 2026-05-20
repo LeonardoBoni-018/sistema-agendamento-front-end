@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment, AppointmentStatus } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
+import { useAuthStore } from '@/store/authStore'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -17,15 +19,20 @@ const FILTERS = [
 
 export function AppointmentsPage() {
     const navigate = useNavigate()
-    const [appointments, setAppointments] = useState<Appointment[]>([])
+    const { user } = useAuthStore()
+    const [rawData, setRawData] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<AppointmentStatus | ''>('')
+
+    const { appointments } = useRealtimeAppointments(rawData, {
+        filterUserId: user?.id,
+    })
 
     const load = async () => {
         setLoading(true)
         try {
             const data = await appointmentService.myAppointments(filter || undefined)
-            setAppointments(data)
+            setRawData(data)
         } catch {
             toast.error('Erro ao carregar agendamentos')
         } finally {
@@ -38,12 +45,15 @@ export function AppointmentsPage() {
     const handleCancel = async (id: number) => {
         try {
             await appointmentService.cancel(id)
-            toast.success('Agendamento cancelado')
-            load()
+            // ✅ A atualização vem via SSE automaticamente
         } catch {
             toast.error('Erro ao cancelar')
         }
     }
+
+    const displayed = filter
+        ? appointments.filter(a => a.status === filter)
+        : appointments
 
     return (
         <div style={{ maxWidth: 900 }}>
@@ -59,7 +69,6 @@ export function AppointmentsPage() {
                             background: filter === f.value ? 'var(--text)' : 'var(--bg-card)',
                             color: filter === f.value ? 'white' : 'var(--text-muted)',
                             border: `1px solid ${filter === f.value ? 'var(--text)' : 'var(--border)'}`,
-                            transition: 'all 0.15s',
                         }}>
                             {f.label}
                         </button>
@@ -70,7 +79,6 @@ export function AppointmentsPage() {
                     padding: '8px 16px', borderRadius: 'var(--radius-sm)',
                     background: 'var(--text)', color: 'white',
                     fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                    flexShrink: 0,
                 }}>
                     <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
                     Novo agendamento
@@ -90,14 +98,11 @@ export function AppointmentsPage() {
                             }} />
                         ))}
                     </div>
-                ) : appointments.length === 0 ? (
+                ) : displayed.length === 0 ? (
                     <div style={{ padding: '60px 20px', textAlign: 'center' }}>
                         <div style={{ fontSize: 36, marginBottom: 10 }}>🗓</div>
-                        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                        <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
                             Nenhum agendamento encontrado
-                        </div>
-                        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
-                            Que tal criar seu primeiro agendamento?
                         </div>
                         <button onClick={() => navigate('/appointments/new')} style={{
                             padding: '9px 20px', borderRadius: 'var(--radius-sm)',
@@ -116,31 +121,23 @@ export function AppointmentsPage() {
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
                             letterSpacing: '0.06em', textTransform: 'uppercase',
                         }}>
-                            <span>Serviço</span>
-                            <span>Data</span>
-                            <span>Horário</span>
-                            <span>Valor</span>
-                            <span>Status</span>
-                            <span></span>
+                            <span>Serviço</span><span>Data</span><span>Horário</span>
+                            <span>Valor</span><span>Status</span><span></span>
                         </div>
-                        {appointments.map((a, idx) => (
+                        {displayed.map((a, idx) => (
                             <div key={a.id} style={{
                                 display: 'grid',
                                 gridTemplateColumns: '2fr 1fr 80px 90px 110px 80px',
                                 padding: '14px 20px', alignItems: 'center',
-                                borderBottom: idx < appointments.length - 1 ? '1px solid var(--border)' : 'none',
+                                borderBottom: idx < displayed.length - 1 ? '1px solid var(--border)' : 'none',
                                 transition: 'background 0.1s',
                             }}
                                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
                                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                             >
                                 <div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                                        {a.jobName}
-                                    </div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                                        {a.jobDurationMinutes}min
-                                    </div>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{a.jobName}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>{a.jobDurationMinutes}min</div>
                                 </div>
                                 <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                                     {format(parseISO(a.date), "dd MMM yy", { locale: ptBR })}
@@ -157,7 +154,6 @@ export function AppointmentsPage() {
                                         <button onClick={() => handleCancel(a.id)} style={{
                                             fontSize: 11, fontWeight: 600, color: 'var(--danger)',
                                             background: 'none', border: 'none', cursor: 'pointer',
-                                            padding: '4px 0',
                                         }}>
                                             Cancelar
                                         </button>

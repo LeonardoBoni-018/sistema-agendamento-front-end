@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment, AppointmentStatus } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -22,15 +23,18 @@ const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
 ]
 
 export function AdminAppointmentsPage() {
-    const [appointments, setAppointments] = useState<Appointment[]>([])
+    const [rawData, setRawData] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<AppointmentStatus | ''>('')
+
+    // ✅ Admin vê todos — sem filtro por userId
+    const { appointments } = useRealtimeAppointments(rawData)
 
     const load = async () => {
         setLoading(true)
         try {
             const data = await appointmentService.getAllAppointments(filter || undefined)
-            setAppointments(data)
+            setRawData(data)
         } catch {
             toast.error('Erro ao carregar agendamentos')
         } finally {
@@ -43,12 +47,15 @@ export function AdminAppointmentsPage() {
     const handleStatusUpdate = async (id: number, status: AppointmentStatus) => {
         try {
             await appointmentService.updateStatus(id, status)
-            toast.success('Status atualizado')
-            load()
+            // ✅ A atualização vem via SSE automaticamente
         } catch {
             toast.error('Erro ao atualizar status')
         }
     }
+
+    const displayed = filter
+        ? appointments.filter(a => a.status === filter)
+        : appointments
 
     return (
         <div style={{ maxWidth: 1000 }}>
@@ -60,11 +67,20 @@ export function AdminAppointmentsPage() {
                         background: filter === f.value ? 'var(--text)' : 'var(--bg-card)',
                         color: filter === f.value ? 'white' : 'var(--text-muted)',
                         border: `1px solid ${filter === f.value ? 'var(--text)' : 'var(--border)'}`,
-                        transition: 'all 0.15s',
                     }}>
                         {f.label}
                     </button>
                 ))}
+                <div style={{
+                    marginLeft: 'auto', fontSize: 12, color: 'var(--text-faint)',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+          <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: 'var(--success)', display: 'inline-block',
+          }} />
+                    Atualizando em tempo real
+                </div>
             </div>
 
             <div style={{
@@ -80,9 +96,8 @@ export function AdminAppointmentsPage() {
                             }} />
                         ))}
                     </div>
-                ) : appointments.length === 0 ? (
+                ) : displayed.length === 0 ? (
                     <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-                        <div style={{ fontSize: 36, marginBottom: 10 }}>📋</div>
                         <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
                             Nenhum agendamento encontrado
                         </div>
@@ -96,20 +111,16 @@ export function AdminAppointmentsPage() {
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
                             letterSpacing: '0.06em', textTransform: 'uppercase',
                         }}>
-                            <span>Cliente</span>
-                            <span>Serviço</span>
-                            <span>Data</span>
-                            <span>Horário</span>
-                            <span>Valor</span>
-                            <span>Status</span>
-                            <span>Alterar status</span>
+                            <span>Cliente</span><span>Serviço</span><span>Data</span>
+                            <span>Hora</span><span>Valor</span><span>Status</span>
+                            <span>Alterar</span>
                         </div>
-                        {appointments.map((a, idx) => (
+                        {displayed.map((a, idx) => (
                             <div key={a.id} style={{
                                 display: 'grid',
                                 gridTemplateColumns: '1.5fr 1.5fr 1fr 80px 90px 110px 130px',
                                 padding: '14px 20px', alignItems: 'center',
-                                borderBottom: idx < appointments.length - 1 ? '1px solid var(--border)' : 'none',
+                                borderBottom: idx < displayed.length - 1 ? '1px solid var(--border)' : 'none',
                                 transition: 'background 0.1s',
                             }}
                                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
@@ -136,7 +147,6 @@ export function AdminAppointmentsPage() {
                                         background: 'var(--bg-surface)', border: '1px solid var(--border)',
                                         borderRadius: 'var(--radius-sm)', padding: '5px 8px',
                                         fontSize: 12, color: 'var(--text)', outline: 'none', cursor: 'pointer',
-                                        width: '100%',
                                     }}
                                 >
                                     {STATUS_OPTIONS.map(s => (

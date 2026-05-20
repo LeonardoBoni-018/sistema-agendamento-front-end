@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { NotificationBell } from '@/components/shared/NotificationBell'
 
 const pageTitles: Record<string, { title: string; desc: string }> = {
     '/dashboard': { title: 'Início', desc: 'Visão geral dos agendamentos' },
@@ -17,8 +18,8 @@ export function Header() {
         <header style={{
             height: 60, borderBottom: '1px solid var(--border)',
             display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between',
             padding: '0 28px', background: 'var(--bg-card)',
-            gap: 12,
         }}>
             <div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', lineHeight: 1.2 }}>
@@ -28,6 +29,7 @@ export function Header() {
                     {page.desc}
                 </div>
             </div>
+            <NotificationBell />
         </header>
     )
 }
