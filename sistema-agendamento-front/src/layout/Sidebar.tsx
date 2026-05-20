@@ -13,6 +13,7 @@ export function Sidebar() {
         ...(admin ? [
             { to: '/jobs', icon: 'ti-scissors', label: 'Serviços' },
             { to: '/admin/appointments', icon: 'ti-users', label: 'Todos agendamentos' },
+            { to: '/admin/configuracao', icon: 'ti-settings', label: 'Configurações' },
         ] : []),
         { to: '/profile', icon: 'ti-user', label: 'Perfil' },
     ]

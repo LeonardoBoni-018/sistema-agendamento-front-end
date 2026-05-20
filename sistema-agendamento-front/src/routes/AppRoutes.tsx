@@ -9,6 +9,7 @@ import { NewAppointmentPage } from '@/pages/appointments/NewAppointmentPage'
 import { JobsPage } from '@/pages/jobs/JobsPage'
 import { AdminAppointmentsPage } from '@/pages/admin/AdminAppointmentsPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
+import {ConfiguracaoPage} from "@/pages/admin/ConfiguracaoPage.tsx";
 
 export function AppRoutes() {
     return (
@@ -29,6 +30,8 @@ export function AppRoutes() {
                                 path="/admin/appointments"
                                 element={<AdminAppointmentsPage />}
                             />
+
+                            <Route path="/admin/configuracao" element={<ConfiguracaoPage />} />
                         </Route>
                     </Route>
                 </Route>
