@@ -17,6 +17,7 @@ export interface Appointment {
     date: string
     time: string
     status: AppointmentStatus
+    jaAvaliou?: boolean
     createdAt: string
     updatedAt: string
 }

@@ -10,6 +10,8 @@ import { JobsPage } from '@/pages/jobs/JobsPage'
 import { AdminAppointmentsPage } from '@/pages/admin/AdminAppointmentsPage'
 import { ProfilePage } from '@/pages/profile/ProfilePage'
 import {ConfiguracaoPage} from "@/pages/admin/ConfiguracaoPage.tsx";
+import { ClientesPage } from '@/pages/admin/ClientesPage'
+import { AvaliacoesPage } from '@/pages/admin/AvaliacoesPage'
 
 export function AppRoutes() {
     return (
@@ -26,11 +28,9 @@ export function AppRoutes() {
 
                         <Route element={<AdminRoute />}>
                             <Route path="/jobs" element={<JobsPage />} />
-                            <Route
-                                path="/admin/appointments"
-                                element={<AdminAppointmentsPage />}
-                            />
-
+                            <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+                            <Route path="/admin/clientes" element={<ClientesPage />} />
+                            <Route path="/admin/avaliacoes" element={<AvaliacoesPage />} />
                             <Route path="/admin/configuracao" element={<ConfiguracaoPage />} />
                         </Route>
                     </Route>

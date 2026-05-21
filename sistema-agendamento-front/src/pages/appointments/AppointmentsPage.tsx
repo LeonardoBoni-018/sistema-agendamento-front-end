@@ -4,10 +4,10 @@ import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment, AppointmentStatus } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { AvaliacaoModal } from '@/components/shared/AvaliacaoModal'
 import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
 import { useAuthStore } from '@/store/authStore'
 import { jobService } from '@/services/jobService'
-import { Job } from '@/types/job'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -26,22 +26,19 @@ export function AppointmentsPage() {
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<AppointmentStatus | ''>('')
     const [reagendando, setReagendando] = useState<Appointment | null>(null)
+    const [avaliando, setAvaliando] = useState<Appointment | null>(null)
     const [novaData, setNovaData] = useState('')
     const [availableTimes, setAvailableTimes] = useState<string[]>([])
     const [loadingTimes, setLoadingTimes] = useState(false)
     const [novoHorario, setNovoHorario] = useState('')
-    const [_jobs, setJobs] = useState<Job[]>([])
 
-    // ✅ Hook recebe TODOS os dados — filtragem acontece no render
-    const { appointments } = useRealtimeAppointments(allData, {
+    const { appointments, setAppointments } = useRealtimeAppointments(allData, {
         filterUserId: user?.id,
     })
 
     const load = useCallback(async () => {
         setLoading(true)
         try {
-            // ✅ Sempre busca todos — sem filtro de status na API
-            // O filtro visual é aplicado no render para SSE funcionar corretamente
             const data = await appointmentService.myAppointments()
             setAllData(data)
         } catch {
@@ -52,7 +49,7 @@ export function AppointmentsPage() {
     }, [])
 
     useEffect(() => { load() }, [load])
-    useEffect(() => { jobService.getAll().then(setJobs) }, [])
+    useEffect(() => { jobService.getAll() }, [])
 
     useEffect(() => {
         if (reagendando && novaData) {
@@ -68,7 +65,6 @@ export function AppointmentsPage() {
     const handleCancel = async (id: number) => {
         try {
             await appointmentService.cancel(id)
-            // ✅ Não precisa recarregar — SSE atualiza automaticamente
         } catch {
             toast.error('Erro ao cancelar')
         }
@@ -81,17 +77,23 @@ export function AppointmentsPage() {
         }
         try {
             await appointmentService.reagendar(reagendando.id, novaData, novoHorario)
-            toast.success('Agendamento reagendado!')
+            toast.success('Reagendado!')
             setReagendando(null)
-            setNovaData('')
-            setNovoHorario('')
-            // ✅ Não precisa recarregar — SSE atualiza automaticamente
         } catch {
             toast.error('Erro ao reagendar')
         }
     }
 
-    // ✅ Filtragem visual — não depende de nova requisição à API
+    // ✅ Atualiza jaAvaliou localmente após avaliar
+    const handleAvaliacaoSuccess = () => {
+        if (!avaliando) return
+        setAppointments(prev =>
+            prev.map(a =>
+                a.id === avaliando.id ? { ...a, jaAvaliou: true } : a
+            )
+        )
+    }
+
     const displayed = filter
         ? appointments.filter(a => a.status === filter)
         : appointments
@@ -104,6 +106,14 @@ export function AppointmentsPage() {
 
     return (
         <div style={{ maxWidth: 900 }}>
+            {avaliando && (
+                <AvaliacaoModal
+                    appointment={avaliando}
+                    onClose={() => setAvaliando(null)}
+                    onSuccess={handleAvaliacaoSuccess}
+                />
+            )}
+
             <div style={{
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'space-between', marginBottom: 20, gap: 12,
@@ -161,8 +171,7 @@ export function AppointmentsPage() {
                             <i className="ti ti-x" aria-hidden="true" />
                         </button>
                     </div>
-
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             <label style={{
                                 fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
@@ -178,7 +187,6 @@ export function AppointmentsPage() {
                                 style={{ ...inputStyle, width: 160 }}
                             />
                         </div>
-
                         {novaData && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 <label style={{
@@ -212,7 +220,6 @@ export function AppointmentsPage() {
                                 )}
                             </div>
                         )}
-
                         {novaData && novoHorario && (
                             <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 2 }}>
                                 <button onClick={handleReagendar} style={{
@@ -220,7 +227,7 @@ export function AppointmentsPage() {
                                     background: 'var(--success)', color: 'white',
                                     fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                                 }}>
-                                    Confirmar reagendamento
+                                    Confirmar
                                 </button>
                             </div>
                         )}
@@ -259,7 +266,7 @@ export function AppointmentsPage() {
                     <>
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '2fr 1fr 80px 90px 110px 120px',
+                            gridTemplateColumns: '2fr 1fr 80px 90px 100px 150px',
                             padding: '10px 20px', borderBottom: '1px solid var(--border)',
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
                             letterSpacing: '0.06em', textTransform: 'uppercase',
@@ -270,7 +277,7 @@ export function AppointmentsPage() {
                         {displayed.map((a, idx) => (
                             <div key={a.id} style={{
                                 display: 'grid',
-                                gridTemplateColumns: '2fr 1fr 80px 90px 110px 120px',
+                                gridTemplateColumns: '2fr 1fr 80px 90px 100px 150px',
                                 padding: '14px 20px', alignItems: 'center',
                                 borderBottom: idx < displayed.length - 1
                                     ? '1px solid var(--border)' : 'none',
@@ -300,15 +307,11 @@ export function AppointmentsPage() {
                                     R$ {Number(a.jobPrice).toFixed(2)}
                                 </div>
                                 <StatusBadge status={a.status} />
-                                <div style={{ display: 'flex', gap: 8 }}>
+                                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                                     {(a.status === 'PENDING' || a.status === 'CONFIRMED') && (
                                         <>
                                             <button
-                                                onClick={() => {
-                                                    setReagendando(a)
-                                                    setNovaData('')
-                                                    setNovoHorario('')
-                                                }}
+                                                onClick={() => { setReagendando(a); setNovaData(''); setNovoHorario('') }}
                                                 style={{
                                                     fontSize: 11, fontWeight: 600,
                                                     color: 'var(--accent-dark)',
@@ -327,6 +330,27 @@ export function AppointmentsPage() {
                                                 Cancelar
                                             </button>
                                         </>
+                                    )}
+                                    {/* ✅ Botão de avaliação para finalizados */}
+                                    {a.status === 'FINISHED' && !a.jaAvaliou && (
+                                        <button
+                                            onClick={() => setAvaliando(a)}
+                                            style={{
+                                                fontSize: 11, fontWeight: 600,
+                                                color: '#F59E0B',
+                                                background: 'none', border: 'none', cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', gap: 3,
+                                            }}
+                                        >
+                                            ★ Avaliar
+                                        </button>
+                                    )}
+                                    {a.status === 'FINISHED' && a.jaAvaliou && (
+                                        <span style={{
+                                            fontSize: 11, color: 'var(--text-faint)',
+                                        }}>
+                      ★ Avaliado
+                    </span>
                                     )}
                                 </div>
                             </div>
