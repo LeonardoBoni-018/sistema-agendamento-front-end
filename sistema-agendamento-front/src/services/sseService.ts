@@ -4,122 +4,119 @@ export type SseEventType =
     | 'APPOINTMENT_CREATED'
     | 'APPOINTMENT_CANCELED'
     | 'APPOINTMENT_STATUS_UPDATED'
-    | 'JOB_CREATED'
-    | 'JOB_UPDATED'
-    | 'JOB_DELETED'
     | 'connected'
 
 export interface SsePayload {
     type: SseEventType
     data: {
         appointment?: any
-        job?: any
-        jobId?: number
         message?: string
     }
 }
 
-type SseHandler = (payload: SsePayload) => void
+type Handler = (payload: SsePayload) => void
 
 class SseService {
     private es: EventSource | null = null
-    private handlers: Map<SseEventType, Set<SseHandler>> = new Map()
+    private handlers = new Map<SseEventType, Set<Handler>>()
     private reconnectTimer: ReturnType<typeof setTimeout> | null = null
-    private reconnectDelay = 3000
-    private isConnecting = false
+    private reconnectDelay = 2000
+    private stopped = false
 
     connect() {
+        if (this.es || this.stopped) return
+
         const token = useAuthStore.getState().token
+        if (!token) return
 
-        console.log('[SSE] Tentando conectar, token:', !!token, 'es:', !!this.es, 'isConnecting:', this.isConnecting)
+        const url = `http://localhost:8080/v1/events/stream?token=${token}`
+        this.es = new EventSource(url)
 
-        if (!token || this.es || this.isConnecting) return
+        this.es.onopen = () => {
+            console.log('[SSE] Conectado')
+            this.reconnectDelay = 2000
+        }
 
-        this.isConnecting = true
-        const url = `http://localhost:8080/v1/events/stream`
+        this.es.onerror = () => {
+            console.warn('[SSE] Erro de conexão, reconectando...')
+            this.closeEventSource()
 
-        try {
-            this.es = new EventSource(`${url}?token=${token}`)
+            if (!this.stopped) {
+                this.reconnectTimer = setTimeout(() => {
+                    this.connect()
+                }, this.reconnectDelay)
 
-            this.es.onopen = () => {
-                console.log('[SSE] ✅ Conectado com sucesso')
-                this.reconnectDelay = 3000
-                this.isConnecting = false
-            }
-
-            this.es.onerror = (e) => {
-                console.error('[SSE] ❌ Erro na conexão:', e)
-                this.isConnecting = false
-                this.disconnect()
-                this.reconnectTimer = setTimeout(() => this.connect(), this.reconnectDelay)
                 this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000)
             }
+        }
 
-            const eventTypes: SseEventType[] = [
-                'connected',
-                'APPOINTMENT_CREATED',
-                'APPOINTMENT_CANCELED',
-                'APPOINTMENT_STATUS_UPDATED',
-                'JOB_CREATED',
-                'JOB_UPDATED',
-                'JOB_DELETED',
-            ]
+        const events: SseEventType[] = [
+            'connected',
+            'APPOINTMENT_CREATED',
+            'APPOINTMENT_CANCELED',
+            'APPOINTMENT_STATUS_UPDATED',
+        ]
 
-            eventTypes.forEach(eventType => {
-                this.es!.addEventListener(eventType, (e: MessageEvent) => {
-                    console.log(`[SSE] 📥 Evento recebido: ${eventType}`, e.data)
-                    try {
-                        const handlers = this.handlers.get(eventType)
-                        if (!handlers) {
-                            console.log(`[SSE] ⚠️ Sem handlers para: ${eventType}`)
-                            return
-                        }
-
-                        let data = e.data
-                        let parsed: SsePayload
-
-                        if (eventType === 'connected') {
-                            parsed = { type: 'connected', data: {} }
-                        } else {
-                            const inner = JSON.parse(data)
-                            parsed = { type: eventType, data: JSON.parse(inner) }
-                        }
-
-                        console.log(`[SSE] 📤 Enviando para ${handlers.size} handlers:`, parsed)
-                        handlers.forEach(h => h(parsed))
-                    } catch (err) {
-                        console.error('[SSE] Erro ao parsear evento:', err)
-                    }
-                })
+        events.forEach(eventType => {
+            this.es!.addEventListener(eventType, (e: MessageEvent) => {
+                this.dispatch(eventType, e.data)
             })
+        })
+    }
+
+    private dispatch(eventType: SseEventType, rawData: string) {
+        const handlers = this.handlers.get(eventType)
+        if (!handlers || handlers.size === 0) return
+
+        if (eventType === 'connected') {
+            handlers.forEach(h => h({ type: 'connected', data: {} }))
+            return
+        }
+
+        try {
+            // ✅ Parseia UMA única vez
+            const parsed = JSON.parse(rawData)
+            const payload: SsePayload = {
+                type: eventType,
+                data: parsed.data ?? parsed,
+            }
+            handlers.forEach(h => h(payload))
         } catch (err) {
-            console.error('[SSE] Erro ao criar EventSource:', err)
-            this.isConnecting = false
+            console.error('[SSE] Erro ao parsear evento:', eventType, rawData, err)
         }
     }
 
-    on(event: SseEventType, handler: SseHandler) {
+    on(event: SseEventType, handler: Handler): () => void {
         if (!this.handlers.has(event)) {
             this.handlers.set(event, new Set())
         }
         this.handlers.get(event)!.add(handler)
-        console.log(`[SSE] Handler registrado para: ${event}, total handlers:`, this.handlers.get(event)?.size)
 
-        return () => this.off(event, handler)
-    }
-
-    off(event: SseEventType, handler: SseHandler) {
-        this.handlers.get(event)?.delete(handler)
+        return () => {
+            this.handlers.get(event)?.delete(handler)
+        }
     }
 
     disconnect() {
-        if (this.es) {
-            this.es.close()
-            this.es = null
-        }
+        this.stopped = true
+        this.closeEventSource()
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer)
             this.reconnectTimer = null
+        }
+    }
+
+    reconnect() {
+        this.stopped = false
+        this.closeEventSource()
+        if (this.reconnectTimer) clearTimeout(this.reconnectTimer)
+        this.connect()
+    }
+
+    private closeEventSource() {
+        if (this.es) {
+            this.es.close()
+            this.es = null
         }
     }
 }

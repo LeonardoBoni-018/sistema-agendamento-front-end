@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
@@ -10,7 +10,6 @@ import { jobService } from '@/services/jobService'
 import { Job } from '@/types/job'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import * as Dialog from '@/components/ui/dialog'
 
 const FILTERS = [
     { value: '', label: 'Todos' },
@@ -23,36 +22,36 @@ const FILTERS = [
 export function AppointmentsPage() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
-    const [rawData, setRawData] = useState<Appointment[]>([])
+    const [allData, setAllData] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<AppointmentStatus | ''>('')
-
     const [reagendando, setReagendando] = useState<Appointment | null>(null)
     const [novaData, setNovaData] = useState('')
     const [availableTimes, setAvailableTimes] = useState<string[]>([])
     const [loadingTimes, setLoadingTimes] = useState(false)
     const [novoHorario, setNovoHorario] = useState('')
-    const [_, setJobs] = useState<Job[]>([])
-    const [cancelando, setCancelando] = useState<Appointment | null>(null)
+    const [_jobs, setJobs] = useState<Job[]>([])
 
-    const { appointments } = useRealtimeAppointments(rawData, {
-        filterUserId: user?.id!,
-        isAdmin: false,
+    // ✅ Hook recebe TODOS os dados — filtragem acontece no render
+    const { appointments } = useRealtimeAppointments(allData, {
+        filterUserId: user?.id,
     })
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true)
         try {
-            const data = await appointmentService.myAppointments(filter || undefined)
-            setRawData(data)
+            // ✅ Sempre busca todos — sem filtro de status na API
+            // O filtro visual é aplicado no render para SSE funcionar corretamente
+            const data = await appointmentService.myAppointments()
+            setAllData(data)
         } catch {
             toast.error('Erro ao carregar agendamentos')
         } finally {
             setLoading(false)
         }
-    }
+    }, [])
 
-    useEffect(() => { load() }, [filter])
+    useEffect(() => { load() }, [load])
     useEffect(() => { jobService.getAll().then(setJobs) }, [])
 
     useEffect(() => {
@@ -69,6 +68,7 @@ export function AppointmentsPage() {
     const handleCancel = async (id: number) => {
         try {
             await appointmentService.cancel(id)
+            // ✅ Não precisa recarregar — SSE atualiza automaticamente
         } catch {
             toast.error('Erro ao cancelar')
         }
@@ -85,11 +85,13 @@ export function AppointmentsPage() {
             setReagendando(null)
             setNovaData('')
             setNovoHorario('')
+            // ✅ Não precisa recarregar — SSE atualiza automaticamente
         } catch {
             toast.error('Erro ao reagendar')
         }
     }
 
+    // ✅ Filtragem visual — não depende de nova requisição à API
     const displayed = filter
         ? appointments.filter(a => a.status === filter)
         : appointments
@@ -134,13 +136,11 @@ export function AppointmentsPage() {
                 </button>
             </div>
 
-            {/* Modal de reagendamento */}
             {reagendando && (
                 <div style={{
                     background: 'var(--bg-card)', border: '1px solid var(--border)',
                     borderRadius: 'var(--radius)', padding: '20px',
-                    marginBottom: 16,
-                    borderLeft: '3px solid var(--accent)',
+                    marginBottom: 16, borderLeft: '3px solid var(--accent)',
                 }}>
                     <div style={{
                         display: 'flex', justifyContent: 'space-between',
@@ -198,17 +198,13 @@ export function AppointmentsPage() {
                                 ) : (
                                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                         {availableTimes.map(t => (
-                                            <button
-                                                key={t}
-                                                onClick={() => setNovoHorario(t)}
-                                                style={{
-                                                    padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                                                    fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                                                    background: novoHorario === t ? 'var(--text)' : 'var(--bg-surface)',
-                                                    color: novoHorario === t ? 'white' : 'var(--text-muted)',
-                                                    border: `1px solid ${novoHorario === t ? 'var(--text)' : 'var(--border)'}`,
-                                                }}
-                                            >
+                                            <button key={t} onClick={() => setNovoHorario(t)} style={{
+                                                padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+                                                fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                                                background: novoHorario === t ? 'var(--text)' : 'var(--bg-surface)',
+                                                color: novoHorario === t ? 'white' : 'var(--text-muted)',
+                                                border: `1px solid ${novoHorario === t ? 'var(--text)' : 'var(--border)'}`,
+                                            }}>
                                                 {t?.slice(0, 5)}
                                             </button>
                                         ))}
@@ -219,14 +215,11 @@ export function AppointmentsPage() {
 
                         {novaData && novoHorario && (
                             <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 2 }}>
-                                <button
-                                    onClick={handleReagendar}
-                                    style={{
-                                        padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                                        background: 'var(--success)', color: 'white',
-                                        fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                                    }}
-                                >
+                                <button onClick={handleReagendar} style={{
+                                    padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                                    background: 'var(--success)', color: 'white',
+                                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                                }}>
                                     Confirmar reagendamento
                                 </button>
                             </div>
@@ -325,7 +318,7 @@ export function AppointmentsPage() {
                                                 Reagendar
                                             </button>
                                             <button
-                                                onClick={() => setCancelando(a)}
+                                                onClick={() => handleCancel(a.id)}
                                                 style={{
                                                     fontSize: 11, fontWeight: 600, color: 'var(--danger)',
                                                     background: 'none', border: 'none', cursor: 'pointer',
@@ -341,49 +334,6 @@ export function AppointmentsPage() {
                     </>
                 )}
             </div>
-
-            <Dialog.Dialog open={!!cancelando} onOpenChange={() => setCancelando(null)}>
-                <Dialog.DialogContent style={{
-                    background: 'var(--bg-card)', border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius)', maxWidth: 400,
-                }}>
-                    <Dialog.DialogHeader>
-                        <Dialog.DialogTitle style={{
-                            fontSize: 16, fontWeight: 600, color: 'var(--text)',
-                        }}>
-                            Cancelar agendamento?
-                        </Dialog.DialogTitle>
-                        <Dialog.DialogDescription style={{
-                            fontSize: 13, color: 'var(--text-muted)', marginTop: 4,
-                        }}>
-                            {cancelando && `Você está prestes a cancelar o agendamento de ${cancelando.jobName} em ${format(parseISO(cancelando.date), "dd 'de' MMMM", { locale: ptBR })} às ${cancelando.time?.slice(0, 5)}. Esta ação não pode ser desfeita.`}
-                        </Dialog.DialogDescription>
-                    </Dialog.DialogHeader>
-                    <div style={{ display: 'flex', gap: 10, marginTop: 16, justifyContent: 'flex-end' }}>
-                        <button onClick={() => setCancelando(null)} style={{
-                            padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                            background: 'var(--bg-surface)', color: 'var(--text-muted)',
-                            border: '1px solid var(--border)',
-                        }}>
-                            Não, manter
-                        </button>
-                        <button onClick={() => {
-                            if (cancelando) {
-                                handleCancel(cancelando.id)
-                                setCancelando(null)
-                            }
-                        }} style={{
-                            padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                            background: 'var(--danger)', color: 'white',
-                            border: 'none',
-                        }}>
-                            Sim, cancelar
-                        </button>
-                    </div>
-                </Dialog.DialogContent>
-            </Dialog.Dialog>
         </div>
     )
 }

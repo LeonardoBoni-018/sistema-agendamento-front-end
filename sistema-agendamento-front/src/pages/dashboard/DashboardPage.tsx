@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { appointmentService } from '@/services/appointmentService'
 import { Appointment } from '@/types/appointment'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { useAuthStore } from '@/store/authStore'
 import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
+import { useAuthStore } from '@/store/authStore'
 import { format, isToday, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
+function Stat({ label, value, color }: {
+    label: string; value: number; color?: string
+}) {
     return (
         <div style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
@@ -17,7 +19,9 @@ function Stat({ label, value, color }: { label: string; value: number; color?: s
             <div style={{ fontSize: 28, fontWeight: 500, color: color ?? 'var(--text)' }}>
                 {value}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {label}
+            </div>
         </div>
     )
 }
@@ -26,30 +30,34 @@ export function DashboardPage() {
     const { isAdmin, user } = useAuthStore()
     const navigate = useNavigate()
     const admin = isAdmin()
-    const [appointments, setAppointments] = useState<Appointment[]>([])
+    const [allData, setAllData] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
-    const { appointments: realtimeAppointments } = useRealtimeAppointments(appointments, {
-        isAdmin: admin,
-        filterUserId: admin ? undefined : user?.id
+
+    const { appointments } = useRealtimeAppointments(allData, {
+        filterUserId: admin ? undefined : user?.id,
     })
 
-    useEffect(() => {
-        const load = admin
-            ? appointmentService.getAllAppointments()
-            : appointmentService.myAppointments()
-        load.then(setAppointments).finally(() => setLoading(false))
+    const load = useCallback(async () => {
+        try {
+            const data = admin
+                ? await appointmentService.getAllAppointments()
+                : await appointmentService.myAppointments()
+            setAllData(data)
+        } finally {
+            setLoading(false)
+        }
     }, [admin])
 
-    const displayAppointments = loading ? appointments : realtimeAppointments
+    useEffect(() => { load() }, [load])
 
-    const todayAppointments = displayAppointments.filter(a => {
+    const todayCount = appointments.filter(a => {
         try { return isToday(parseISO(a.date)) } catch { return false }
-    })
-    const pending = displayAppointments.filter(a => a.status === 'PENDING').length
-    const confirmed = displayAppointments.filter(a => a.status === 'CONFIRMED').length
-    const canceled = displayAppointments.filter(a => a.status === 'CANCELED').length
+    }).length
+    const confirmed = appointments.filter(a => a.status === 'CONFIRMED').length
+    const pending = appointments.filter(a => a.status === 'PENDING').length
+    const canceled = appointments.filter(a => a.status === 'CANCELED').length
 
-    const upcoming = displayAppointments
+    const upcoming = appointments
         .filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED')
         .slice(0, 6)
 
@@ -68,10 +76,10 @@ export function DashboardPage() {
             </div>
 
             <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+                display: 'grid', gridTemplateColumns: 'repeat(4,1fr)',
                 gap: 12, marginBottom: 28,
             }}>
-                <Stat label="Hoje" value={todayAppointments.length} />
+                <Stat label="Hoje" value={todayCount} />
                 <Stat label="Confirmados" value={confirmed} color="var(--success)" />
                 <Stat label="Pendentes" value={pending} color="var(--pending)" />
                 <Stat label="Cancelados" value={canceled} color="var(--danger)" />
@@ -90,7 +98,7 @@ export function DashboardPage() {
                             {admin ? 'Próximos agendamentos' : 'Meus próximos horários'}
                         </div>
                         <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 1 }}>
-                            Pendentes e confirmados
+                            Pendentes e confirmados · atualização em tempo real
                         </div>
                     </div>
                     {!admin && (
@@ -112,7 +120,6 @@ export function DashboardPage() {
                             <div key={i} style={{
                                 height: 48, background: 'var(--bg-surface)',
                                 borderRadius: 'var(--radius-sm)', marginBottom: 8,
-                                animation: 'pulse 1.5s infinite',
                             }} />
                         ))}
                     </div>
@@ -139,17 +146,21 @@ export function DashboardPage() {
                             <div key={a.id} style={{
                                 display: 'flex', alignItems: 'center', gap: 16,
                                 padding: '14px 20px',
-                                borderBottom: idx < upcoming.length - 1 ? '1px solid var(--border)' : 'none',
+                                borderBottom: idx < upcoming.length - 1
+                                    ? '1px solid var(--border)' : 'none',
                             }}>
                                 <div style={{
                                     minWidth: 44, fontSize: 13, fontWeight: 600,
-                                    color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums',
+                                    color: 'var(--text-muted)',
+                                    fontVariantNumeric: 'tabular-nums',
                                 }}>
                                     {a.time?.slice(0, 5)}
                                 </div>
                                 <div style={{
-                                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                                    background: a.status === 'CONFIRMED' ? 'var(--success)' : 'var(--pending)',
+                                    width: 8, height: 8, borderRadius: '50%',
+                                    background: a.status === 'CONFIRMED'
+                                        ? 'var(--success)' : 'var(--pending)',
+                                    flexShrink: 0,
                                 }} />
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{
@@ -159,7 +170,9 @@ export function DashboardPage() {
                                         {admin ? a.userName : a.jobName}
                                     </div>
                                     <div style={{ fontSize: 12, color: 'var(--text-faint)' }}>
-                                        {admin ? a.jobName : format(parseISO(a.date), "dd 'de' MMM", { locale: ptBR })}
+                                        {admin
+                                            ? a.jobName
+                                            : format(parseISO(a.date), "dd 'de' MMM", { locale: ptBR })}
                                     </div>
                                 </div>
                                 <StatusBadge status={a.status} />

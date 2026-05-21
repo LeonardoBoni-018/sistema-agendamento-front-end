@@ -1,14 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { sseService, SsePayload } from '@/services/sseService'
 import { Appointment } from '@/types/appointment'
 
 interface Options {
-    onCreated?: (appointment: Appointment) => void
-    onUpdated?: (appointment: Appointment) => void
-    onCanceled?: (appointment: Appointment) => void
     filterUserId?: number
-    isAdmin?: boolean
 }
 
 export function useRealtimeAppointments(
@@ -17,73 +13,90 @@ export function useRealtimeAppointments(
 ) {
     const [appointments, setAppointments] = useState<Appointment[]>(initialData)
 
+    // ✅ Sincroniza quando initialData muda (ex: filtro aplicado)
     useEffect(() => {
         setAppointments(initialData)
-    }, [initialData.length])
+    }, [initialData])
+
+    const filterUserIdRef = useRef(options.filterUserId)
+    filterUserIdRef.current = options.filterUserId
 
     useEffect(() => {
-        const shouldFilterByUser = !options.isAdmin && options.filterUserId != null
+        // ✅ APPOINTMENT_CREATED — adiciona na lista se não existir
+        const unsubCreate = sseService.on(
+            'APPOINTMENT_CREATED',
+            (payload: SsePayload) => {
+                const appt: Appointment = payload.data?.appointment
+                if (!appt) return
 
-        const unsubCreate = sseService.on('APPOINTMENT_CREATED', (payload: SsePayload) => {
-            const appt: Appointment = payload.data.appointment
-            const msg: string = payload.data.message ?? 'Novo agendamento criado'
+                const userId = filterUserIdRef.current
+                if (userId && appt.userId !== userId) return
 
-            if (shouldFilterByUser && appt.userId !== options.filterUserId) return
+                setAppointments(prev => {
+                    const exists = prev.some(a => a.id === appt.id)
+                    if (exists) return prev
+                    return [appt, ...prev]
+                })
 
-            setAppointments(prev => {
-                const exists = prev.find(a => a.id === appt.id)
-                if (exists) return prev
-                return [appt, ...prev]
-            })
+                toast.info(payload.data?.message ?? 'Novo agendamento', {
+                    description: `${appt.jobName} · ${appt.time?.slice(0, 5)}`,
+                    duration: 5000,
+                })
+            }
+        )
 
-            toast.info(msg, {
-                description: `${appt.jobName} · ${appt.time?.slice(0, 5)}`,
-                duration: 5000,
-            })
+        // ✅ APPOINTMENT_STATUS_UPDATED — atualiza o item existente pelo id
+        const unsubUpdated = sseService.on(
+            'APPOINTMENT_STATUS_UPDATED',
+            (payload: SsePayload) => {
+                const appt: Appointment = payload.data?.appointment
+                if (!appt) return
 
-            options.onCreated?.(appt)
-        })
+                const userId = filterUserIdRef.current
+                if (userId && appt.userId !== userId) return
 
-        const unsubUpdated = sseService.on('APPOINTMENT_STATUS_UPDATED', (payload: SsePayload) => {
-            const appt: Appointment = payload.data.appointment
-            const msg: string = payload.data.message ?? 'Status atualizado'
+                // ✅ Sempre atualiza — independente de o item estar visível no filtro
+                setAppointments(prev =>
+                    prev.map(a => (a.id === appt.id ? { ...a, ...appt } : a))
+                )
 
-            if (shouldFilterByUser && appt.userId !== options.filterUserId) return
+                const msg = payload.data?.message ?? 'Status atualizado'
+                if (appt.status === 'CONFIRMED') {
+                    toast.success(msg, { duration: 5000 })
+                } else if (appt.status === 'CANCELED') {
+                    toast.error(msg, { duration: 5000 })
+                } else {
+                    toast.info(msg, { duration: 5000 })
+                }
+            }
+        )
 
-            setAppointments(prev =>
-                prev.map(a => a.id === appt.id ? appt : a)
-            )
+        // ✅ APPOINTMENT_CANCELED — atualiza status para CANCELED
+        const unsubCanceled = sseService.on(
+            'APPOINTMENT_CANCELED',
+            (payload: SsePayload) => {
+                const appt: Appointment = payload.data?.appointment
+                if (!appt) return
 
-            const toastFn = appt.status === 'CONFIRMED'
-                ? toast.success
-                : appt.status === 'CANCELED'
-                    ? toast.error
-                    : toast.info
+                const userId = filterUserIdRef.current
+                if (userId && appt.userId !== userId) return
 
-            toastFn(msg, { duration: 5000 })
-            options.onUpdated?.(appt)
-        })
+                setAppointments(prev =>
+                    prev.map(a => (a.id === appt.id ? { ...a, ...appt } : a))
+                )
 
-        const unsubCanceled = sseService.on('APPOINTMENT_CANCELED', (payload: SsePayload) => {
-            const appt: Appointment = payload.data.appointment
-            const msg: string = payload.data.message ?? 'Agendamento cancelado'
-
-            if (shouldFilterByUser && appt.userId !== options.filterUserId) return
-
-            setAppointments(prev =>
-                prev.map(a => a.id === appt.id ? appt : a)
-            )
-
-            toast.error(msg, { duration: 5000 })
-            options.onCanceled?.(appt)
-        })
+                toast.error(payload.data?.message ?? 'Agendamento cancelado', {
+                    duration: 5000,
+                })
+            }
+        )
 
         return () => {
             unsubCreate()
             unsubUpdated()
             unsubCanceled()
         }
-    }, [options.filterUserId, options.isAdmin])
+    }, [])
 
     return { appointments, setAppointments }
 }

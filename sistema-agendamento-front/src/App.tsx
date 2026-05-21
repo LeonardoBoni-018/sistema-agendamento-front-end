@@ -9,11 +9,14 @@ function App() {
 
     useEffect(() => {
         if (token) {
-            sseService.connect()
+            sseService.reconnect()
         } else {
             sseService.disconnect()
         }
-        return () => { sseService.disconnect() }
+
+        return () => {
+            sseService.disconnect()
+        }
     }, [token])
 
     return (
