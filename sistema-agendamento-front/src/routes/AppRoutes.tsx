@@ -3,22 +3,27 @@ import { PrivateRoute } from './PrivateRoute'
 import { AdminRoute } from './AdminRoute'
 import { DashboardLayout } from 'src/components/layout/DashboardLayout'
 import { LoginPage } from '@/pages/auth/LoginPage'
+import { AgendamentoPublicoPage } from '@/pages/publico/AgendamentoPublicoPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage'
 import { NewAppointmentPage } from '@/pages/appointments/NewAppointmentPage'
 import { JobsPage } from '@/pages/jobs/JobsPage'
 import { AdminAppointmentsPage } from '@/pages/admin/AdminAppointmentsPage'
-import { ProfilePage } from '@/pages/profile/ProfilePage'
-import {ConfiguracaoPage} from "@/pages/admin/ConfiguracaoPage.tsx";
 import { ClientesPage } from '@/pages/admin/ClientesPage'
 import { AvaliacoesPage } from '@/pages/admin/AvaliacoesPage'
+import { ConfiguracaoPage } from '@/pages/admin/ConfiguracaoPage'
+import { FuncionariosPage } from '@/pages/admin/FuncionariosPage'
+import { ProfilePage } from '@/pages/profile/ProfilePage'
 
 export function AppRoutes() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* Públicas */}
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/agendar/:comercioId" element={<AgendamentoPublicoPage />} />
 
+                {/* Privadas */}
                 <Route element={<PrivateRoute />}>
                     <Route element={<DashboardLayout />}>
                         <Route path="/dashboard" element={<DashboardPage />} />
@@ -28,6 +33,7 @@ export function AppRoutes() {
 
                         <Route element={<AdminRoute />}>
                             <Route path="/jobs" element={<JobsPage />} />
+                            <Route path="/admin/funcionarios" element={<FuncionariosPage />} />
                             <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
                             <Route path="/admin/clientes" element={<ClientesPage />} />
                             <Route path="/admin/avaliacoes" element={<AvaliacoesPage />} />

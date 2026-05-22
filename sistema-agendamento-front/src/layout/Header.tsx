@@ -6,10 +6,11 @@ const pageTitles: Record<string, { title: string; desc: string }> = {
     '/appointments': { title: 'Meus agendamentos', desc: 'Histórico e próximos horários' },
     '/appointments/new': { title: 'Novo agendamento', desc: 'Escolha um serviço e horário' },
     '/jobs': { title: 'Serviços', desc: 'Gerencie os serviços do comércio' },
+    '/admin/funcionarios': { title: 'Profissionais', desc: 'Equipe do comércio' },
     '/admin/appointments': { title: 'Todos os agendamentos', desc: 'Visão completa do comércio' },
-    '/admin/clientes': { title: 'Clientes', desc: 'Painel de clientes do comércio' },
+    '/admin/clientes': { title: 'Clientes', desc: 'Painel de clientes' },
     '/admin/avaliacoes': { title: 'Avaliações', desc: 'Avaliações pós-atendimento' },
-    '/admin/configuracao': { title: 'Configurações', desc: 'Horários e bloqueios do comércio' },
+    '/admin/configuracao': { title: 'Configurações', desc: 'Horários e bloqueios' },
     '/profile': { title: 'Perfil', desc: 'Suas informações pessoais' },
 }
 

@@ -4,12 +4,17 @@ export type SseEventType =
     | 'APPOINTMENT_CREATED'
     | 'APPOINTMENT_CANCELED'
     | 'APPOINTMENT_STATUS_UPDATED'
+    | 'JOB_CREATED'
+    | 'JOB_UPDATED'
+    | 'JOB_DELETED'
     | 'connected'
 
 export interface SsePayload {
     type: SseEventType
     data: {
         appointment?: any
+        job?: any
+        jobId?: number
         message?: string
     }
 }

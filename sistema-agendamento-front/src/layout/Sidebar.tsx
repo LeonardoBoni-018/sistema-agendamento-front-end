@@ -9,15 +9,15 @@ export function Sidebar() {
 
     const navItems = [
         { to: '/dashboard', icon: 'ti-layout-dashboard', label: 'Início' },
+        { to: '/appointments', icon: 'ti-calendar', label: 'Meus agendamentos' },
         ...(admin ? [
             { to: '/jobs', icon: 'ti-scissors', label: 'Serviços' },
+            { to: '/admin/funcionarios', icon: 'ti-user-check', label: 'Profissionais' },
             { to: '/admin/appointments', icon: 'ti-users', label: 'Todos agendamentos' },
             { to: '/admin/clientes', icon: 'ti-address-book', label: 'Clientes' },
             { to: '/admin/avaliacoes', icon: 'ti-star', label: 'Avaliações' },
             { to: '/admin/configuracao', icon: 'ti-settings', label: 'Configurações' },
-        ] : [
-            { to: '/appointments', icon: 'ti-calendar', label: 'Meus agendamentos' },
-        ]),
+        ] : []),
         { to: '/profile', icon: 'ti-user', label: 'Perfil' },
     ]
 

@@ -26,4 +26,5 @@ export interface CreateAppointmentRequest {
     jobId: number
     date: string
     time: string
+    funcionarioId?: number
 }
