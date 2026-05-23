@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from 'src/layout/Sidebar'
 import { Header }  from 'src/layout/Header'
-
+//
 export function DashboardLayout() {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
