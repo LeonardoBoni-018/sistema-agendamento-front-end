@@ -7,6 +7,8 @@ export type SseEventType =
     | 'JOB_CREATED'
     | 'JOB_UPDATED'
     | 'JOB_DELETED'
+    | 'FILA_VAGA_DISPONIVEL'
+    | 'PAGAMENTO_APROVADO'
     | 'connected'
 
 export interface SsePayload {
@@ -16,6 +18,8 @@ export interface SsePayload {
         job?: any
         jobId?: number
         message?: string
+        userId?: number
+        appointmentId?: number
     }
 }
 
@@ -60,6 +64,8 @@ class SseService {
             'APPOINTMENT_CREATED',
             'APPOINTMENT_CANCELED',
             'APPOINTMENT_STATUS_UPDATED',
+            'FILA_VAGA_DISPONIVEL',
+            'PAGAMENTO_APROVADO',
         ]
 
         events.forEach(eventType => {

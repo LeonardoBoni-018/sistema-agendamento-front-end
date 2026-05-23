@@ -2,9 +2,13 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { appointmentService } from '@/services/appointmentService'
+import { filaService } from '@/services/filaService'
 import { Appointment, AppointmentStatus } from '@/types/appointment'
+import { FilaEspera } from '@/types/fila'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { AvaliacaoModal } from '@/components/shared/AvaliacaoModal'
+import { PagamentoCard } from '@/components/shared/PagamentoCard'
+import { FilaEsperaCard } from '@/components/shared/FilaEsperaCard'
 import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
 import { useAuthStore } from '@/store/authStore'
 import { jobService } from '@/services/jobService'
@@ -31,18 +35,27 @@ export function AppointmentsPage() {
     const [availableTimes, setAvailableTimes] = useState<string[]>([])
     const [loadingTimes, setLoadingTimes] = useState(false)
     const [novoHorario, setNovoHorario] = useState('')
+    const [filas, setFilas] = useState<FilaEspera[]>([])
+    const [expandedPayment, setExpandedPayment] = useState<number | null>(null)
 
     const { appointments, setAppointments } = useRealtimeAppointments(allData, {
         filterUserId: user?.id,
+        onFilaVaga: () => {
+            filaService.minhaFila().then(setFilas)
+        },
     })
 
     const load = useCallback(async () => {
         setLoading(true)
         try {
-            const data = await appointmentService.myAppointments()
+            const [data, fila] = await Promise.all([
+                appointmentService.myAppointments(),
+                filaService.minhaFila(),
+            ])
             setAllData(data)
+            setFilas(fila)
         } catch {
-            toast.error('Erro ao carregar agendamentos')
+            toast.error('Erro ao carregar dados')
         } finally {
             setLoading(false)
         }
@@ -84,13 +97,10 @@ export function AppointmentsPage() {
         }
     }
 
-    // ✅ Atualiza jaAvaliou localmente após avaliar
     const handleAvaliacaoSuccess = () => {
         if (!avaliando) return
         setAppointments(prev =>
-            prev.map(a =>
-                a.id === avaliando.id ? { ...a, jaAvaliou: true } : a
-            )
+            prev.map(a => a.id === avaliando.id ? { ...a, jaAvaliou: true } : a)
         )
     }
 
@@ -113,6 +123,11 @@ export function AppointmentsPage() {
                     onSuccess={handleAvaliacaoSuccess}
                 />
             )}
+
+            <FilaEsperaCard
+                filas={filas}
+                onSair={id => setFilas(prev => prev.filter(f => f.id !== id))}
+            />
 
             <div style={{
                 display: 'flex', alignItems: 'center',
@@ -266,97 +281,143 @@ export function AppointmentsPage() {
                     <>
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '2fr 1fr 80px 90px 100px 150px',
+                            gridTemplateColumns: '2fr 1fr 80px 90px 100px 1fr',
                             padding: '10px 20px', borderBottom: '1px solid var(--border)',
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
                             letterSpacing: '0.06em', textTransform: 'uppercase',
                         }}>
-                            <span>Serviço</span><span>Data</span><span>Horário</span>
+                            <span>Serviço</span><span>Data</span><span>Hora</span>
                             <span>Valor</span><span>Status</span><span>Ações</span>
                         </div>
-                        {displayed.map((a, idx) => (
-                            <div key={a.id} style={{
-                                display: 'grid',
-                                gridTemplateColumns: '2fr 1fr 80px 90px 100px 150px',
-                                padding: '14px 20px', alignItems: 'center',
-                                borderBottom: idx < displayed.length - 1
-                                    ? '1px solid var(--border)' : 'none',
-                                transition: 'background 0.1s',
-                            }}
-                                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
-                                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                            >
-                                <div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                                        {a.jobName}
-                                    </div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                                        {a.jobDurationMinutes}min
-                                    </div>
-                                </div>
-                                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                                    {format(parseISO(a.date), "dd MMM yy", { locale: ptBR })}
-                                </div>
+                        {displayed.map((a) => (
+                            <div key={a.id}>
                                 <div style={{
-                                    fontSize: 13, color: 'var(--text-muted)',
-                                    fontVariantNumeric: 'tabular-nums',
-                                }}>
-                                    {a.time?.slice(0, 5)}
-                                </div>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                                    R$ {Number(a.jobPrice).toFixed(2)}
-                                </div>
-                                <StatusBadge status={a.status} />
-                                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                                    {(a.status === 'PENDING' || a.status === 'CONFIRMED') && (
-                                        <>
+                                    display: 'grid',
+                                    gridTemplateColumns: '2fr 1fr 80px 90px 100px 1fr',
+                                    padding: '14px 20px', alignItems: 'center',
+                                    borderBottom: '1px solid var(--border)',
+                                    transition: 'background 0.1s',
+                                }}
+                                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
+                                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                            {a.jobName}
+                                        </div>
+                                        {a.funcionarioNome && (
+                                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                                                {a.funcionarioNome}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                                        {format(parseISO(a.date), "dd MMM yy", { locale: ptBR })}
+                                    </div>
+                                    <div style={{
+                                        fontSize: 13, color: 'var(--text-muted)',
+                                        fontVariantNumeric: 'tabular-nums',
+                                    }}>
+                                        {a.time?.slice(0, 5)}
+                                    </div>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                        R$ {Number(a.jobPrice).toFixed(2)}
+                                    </div>
+                                    <StatusBadge status={a.status} />
+                                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                                        {(a.status === 'PENDING' || a.status === 'CONFIRMED') && (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        setReagendando(a)
+                                                        setNovaData('')
+                                                        setNovoHorario('')
+                                                    }}
+                                                    style={{
+                                                        fontSize: 11, fontWeight: 600,
+                                                        color: 'var(--accent-dark)',
+                                                        background: 'none', border: 'none', cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    Reagendar
+                                                </button>
+                                                <button
+                                                    onClick={() => handleCancel(a.id)}
+                                                    style={{
+                                                        fontSize: 11, fontWeight: 600, color: 'var(--danger)',
+                                                        background: 'none', border: 'none', cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    onClick={() => setExpandedPayment(
+                                                        expandedPayment === a.id ? null : a.id
+                                                    )}
+                                                    style={{
+                                                        fontSize: 11, fontWeight: 600, color: '#2563EB',
+                                                        background: 'none', border: 'none', cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    💳
+                                                </button>
+                                            </>
+                                        )}
+                                        {a.status === 'FINISHED' && !a.jaAvaliou && (
                                             <button
-                                                onClick={() => { setReagendando(a); setNovaData(''); setNovoHorario('') }}
+                                                onClick={() => setAvaliando(a)}
                                                 style={{
-                                                    fontSize: 11, fontWeight: 600,
-                                                    color: 'var(--accent-dark)',
+                                                    fontSize: 11, fontWeight: 600, color: '#F59E0B',
                                                     background: 'none', border: 'none', cursor: 'pointer',
                                                 }}
                                             >
-                                                Reagendar
+                                                ★ Avaliar
                                             </button>
-                                            <button
-                                                onClick={() => handleCancel(a.id)}
-                                                style={{
-                                                    fontSize: 11, fontWeight: 600, color: 'var(--danger)',
-                                                    background: 'none', border: 'none', cursor: 'pointer',
-                                                }}
-                                            >
-                                                Cancelar
-                                            </button>
-                                        </>
-                                    )}
-                                    {/* ✅ Botão de avaliação para finalizados */}
-                                    {a.status === 'FINISHED' && !a.jaAvaliou && (
-                                        <button
-                                            onClick={() => setAvaliando(a)}
-                                            style={{
-                                                fontSize: 11, fontWeight: 600,
-                                                color: '#F59E0B',
-                                                background: 'none', border: 'none', cursor: 'pointer',
-                                                display: 'flex', alignItems: 'center', gap: 3,
-                                            }}
-                                        >
-                                            ★ Avaliar
-                                        </button>
-                                    )}
-                                    {a.status === 'FINISHED' && a.jaAvaliou && (
-                                        <span style={{
-                                            fontSize: 11, color: 'var(--text-faint)',
-                                        }}>
-                      ★ Avaliado
-                    </span>
-                                    )}
+                                        )}
+                                        {a.status === 'FINISHED' && a.jaAvaliou && (
+                                            <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                        ★ Avaliado
+                      </span>
+                                        )}
+                                    </div>
                                 </div>
+                                {expandedPayment === a.id && (
+                                    <div style={{ padding: '0 20px 12px' }}>
+                                        <PagamentoCard appointment={a} />
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </>
                 )}
+            </div>
+
+            <div style={{
+                marginTop: 16, background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius)', padding: '14px 20px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+                <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                        Horário esgotado?
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                        Entre na fila de espera e seja notificado quando uma vaga abrir
+                    </div>
+                </div>
+                <button
+                    onClick={() => navigate('/fila')}
+                    style={{
+                        padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                        background: '#FEF3C7', color: '#92400E',
+                        fontSize: 12, fontWeight: 600,
+                        border: '1px solid #FDE68A', cursor: 'pointer',
+                        flexShrink: 0,
+                    }}
+                >
+                    ⏳ Entrar na fila
+                </button>
             </div>
         </div>
     )

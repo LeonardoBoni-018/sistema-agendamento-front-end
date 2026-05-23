@@ -10,10 +10,12 @@ export function Sidebar() {
     const navItems = [
         { to: '/dashboard', icon: 'ti-layout-dashboard', label: 'Início' },
         { to: '/appointments', icon: 'ti-calendar', label: 'Meus agendamentos' },
+        { to: '/fila', icon: 'ti-clock', label: 'Fila de espera' },
         ...(admin ? [
             { to: '/jobs', icon: 'ti-scissors', label: 'Serviços' },
             { to: '/admin/funcionarios', icon: 'ti-user-check', label: 'Profissionais' },
             { to: '/admin/appointments', icon: 'ti-users', label: 'Todos agendamentos' },
+            { to: '/admin/fila', icon: 'ti-list', label: 'Fila de espera' },
             { to: '/admin/clientes', icon: 'ti-address-book', label: 'Clientes' },
             { to: '/admin/avaliacoes', icon: 'ti-star', label: 'Avaliações' },
             { to: '/admin/configuracao', icon: 'ti-settings', label: 'Configurações' },
