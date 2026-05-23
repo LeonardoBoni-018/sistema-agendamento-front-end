@@ -6,7 +6,6 @@ import { Appointment } from '@/types/appointment'
 interface Options {
     filterUserId?: number
 }
-//
 
 export function useRealtimeAppointments(
     initialData: Appointment[],
