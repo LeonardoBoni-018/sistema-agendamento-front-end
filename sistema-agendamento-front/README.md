@@ -1,73 +1,119 @@
-# React + TypeScript + Vite
+<div align="center">
+  <h1>Sistema de Agendamento — Frontend</h1>
+  <p><strong>Aplicação web para gerenciamento de agendamentos em estabelecimentos comerciais</strong></p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+  <p>
+    <img src="https://img.shields.io/badge/React-19.2-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React 19"/>
+    <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 6"/>
+    <img src="https://img.shields.io/badge/Vite-8.0-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 8"/>
+    <img src="https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS 4"/>
+    <img src="https://img.shields.io/badge/shadcn/ui-000000?style=flat-square&logo=shadcnui&logoColor=white" alt="shadcn/ui"/>
+    <img src="https://img.shields.io/badge/Zustand-5.0-443E38?style=flat-square" alt="Zustand 5"/>
+    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"/>
+  </p>
+</div>
 
-Currently, two official plugins are available:
+## Sobre
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Interface web moderna para o sistema de agendamento. Permite que estabelecimentos gerenciem seus profissionais, serviços e horários, e que clientes realizem agendamentos de forma prática e rápida.
 
-## React Compiler
+## Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Autenticação** com login e sessão persistente (Zustand + localStorage)
+- **Dashboard** com métricas e indicadores visuais
+- **Gerenciamento de agendamentos** — criar, visualizar, filtrar e cancelar
+- **Painel administrativo** — CRUD de funcionários, serviços, horários e bloqueios
+- **Página pública de agendamento** — clientes agendam sem cadastro
+- **Notificações em tempo real** via SSE
+- **Avaliações** com estrelas após atendimento
+- **Tema claro/escuro** com next-themes
+- **Design responsivo** com Tailwind CSS + shadcn/ui
 
-## Expanding the ESLint configuration
+## Tecnologias
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Categoria | Tecnologia |
+|---|---|
+| Framework | React 19.2 |
+| Linguagem | TypeScript 6.0 |
+| Build | Vite 8.0 |
+| Estilização | Tailwind CSS 4.3 + shadcn/ui (Radix UI) |
+| Estado | Zustand 5.0 |
+| Roteamento | React Router DOM 7.15 |
+| Formulários | React Hook Form 7.76 + Zod 4.4 |
+| HTTP | Axios 1.16 |
+| Notificações | Sonner 2.0 |
+| Ícones | Lucide React |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Pré-requisitos
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js 20+
+- npm ou yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Configuração
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/sistema-agendamento-front.git
+cd sistema-agendamento-front
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Instale as dependências:
+```bash
+npm install
 ```
+
+3. Configure as variáveis de ambiente (copie `.env.example` para `.env`):
+```bash
+cp .env.example .env
+```
+
+4. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+A aplicação estará disponível em `http://localhost:5173`.
+
+## Scripts
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Inicia servidor de desenvolvimento |
+| `npm run build` | Compila para produção (TypeScript + Vite) |
+| `npm run lint` | Executa ESLint em todo o projeto |
+| `npm run preview` | Visualiza build de produção localmente |
+
+## Estrutura do Projeto
+
+```
+src/
+├── components/
+│   ├── layout/      # DashboardLayout
+│   ├── shared/      # Componentes reutilizáveis
+│   └── ui/          # Componentes shadcn/ui
+├── hooks/           # Hooks customizados (SSE, tempo real)
+├── layout/          # Header, Sidebar
+├── lib/             # Utilitários
+├── pages/           # Páginas da aplicação
+│   ├── admin/       # Painel administrativo
+│   ├── appointments/# Agendamentos
+│   ├── auth/        # Login
+│   ├── dashboard/   # Dashboard
+│   ├── jobs/        # Serviços
+│   ├── profile/     # Perfil
+│   └── publico/     # Agendamento público
+├── routes/          # Configuração de rotas
+├── services/        # Serviços HTTP (Axios)
+├── store/           # Estado global (Zustand)
+└── types/           # Definições TypeScript
+```
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT — veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+<div align="center">
+  <sub>Desenvolvido com ❤️</sub>
+</div>
