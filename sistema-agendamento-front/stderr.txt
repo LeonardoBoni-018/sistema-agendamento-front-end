@@ -1,0 +1,26 @@
+[2m22:17:09[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 401
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+ > Axios$1.request node_modules/axios/lib/core/Axios.js:46:40
+ > Object.myAppointments src/services/appointmentService.ts:13:20
+    11 |          date?: string
+    12 |      ): Promise<Appointment[]> => {
+    13 |          const res = await api.get('/v1/appointment/me', { params: { status, date } })
+       |                      ^
+    14 |          return res.data
+    15 |      },
+ > src/pages/dashboard/DashboardPage.tsx:127:27
+
+[2m22:17:09[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 401
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+ > Axios$1.request node_modules/axios/lib/core/Axios.js:46:40
+ > Object.myAppointments src/services/appointmentService.ts:13:20
+    11 |          date?: string
+    12 |      ): Promise<Appointment[]> => {
+    13 |          const res = await api.get('/v1/appointment/me', { params: { status, date } })
+       |                      ^
+    14 |          return res.data
+    15 |      },
+ > src/pages/dashboard/DashboardPage.tsx:127:27
+
