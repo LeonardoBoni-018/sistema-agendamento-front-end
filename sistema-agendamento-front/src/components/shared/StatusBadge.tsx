@@ -1,21 +1,14 @@
 import { AppointmentStatus } from '@/types/appointment'
+import { Badge, BadgeVariant } from '@/components/ui/badge'
 
-const config: Record<AppointmentStatus, { label: string; bg: string; color: string }> = {
-    PENDING: { label: 'Pendente', bg: 'var(--pending-light)', color: '#92400E' },
-    CONFIRMED: { label: 'Confirmado', bg: 'var(--success-light)', color: '#065F46' },
-    CANCELED: { label: 'Cancelado', bg: 'var(--danger-light)', color: '#991B1B' },
-    FINISHED: { label: 'Finalizado', bg: 'var(--bg-surface)', color: 'var(--text-muted)' },
+const config: Record<AppointmentStatus, { label: string; variant: BadgeVariant; dot: boolean }> = {
+    PENDING: { label: 'Pendente', variant: 'warning', dot: true },
+    CONFIRMED: { label: 'Confirmado', variant: 'success', dot: true },
+    CANCELED: { label: 'Cancelado', variant: 'danger', dot: false },
+    FINISHED: { label: 'Finalizado', variant: 'muted', dot: false },
 }
 
 export function StatusBadge({ status }: { status: AppointmentStatus }) {
-    const { label, bg, color } = config[status]
-    return (
-        <span style={{
-            display: 'inline-block', fontSize: 11, fontWeight: 600,
-            padding: '3px 9px', borderRadius: 20, background: bg, color,
-            letterSpacing: '0.02em',
-        }}>
-      {label}
-    </span>
-    )
+    const { label, variant, dot } = config[status]
+    return <Badge variant={variant} dot={dot}>{label}</Badge>
 }

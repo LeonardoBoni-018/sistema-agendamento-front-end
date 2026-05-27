@@ -8,15 +8,9 @@ function App() {
     const token = useAuthStore(s => s.token)
 
     useEffect(() => {
-        if (token) {
-            sseService.reconnect()
-        } else {
-            sseService.disconnect()
-        }
-
-        return () => {
-            sseService.disconnect()
-        }
+        if (token) sseService.reconnect()
+        else sseService.disconnect()
+        return () => sseService.disconnect()
     }, [token])
 
     return (
@@ -24,13 +18,19 @@ function App() {
             <AppRoutes />
             <Toaster
                 position="bottom-right"
+                gap={8}
                 toastOptions={{
                     style: {
-                        background: 'var(--bg-card)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--text)',
+                        fontFamily: 'var(--font)',
                         fontSize: 13,
-                        borderRadius: 8,
+                        borderRadius: 'var(--radius)',
+                        border: '1px solid var(--border)',
+                        boxShadow: 'var(--shadow-xl)',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text)',
+                    },
+                    classNames: {
+                        title: 'font-semibold',
                     },
                 }}
             />

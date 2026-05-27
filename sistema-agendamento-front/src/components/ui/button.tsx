@@ -1,56 +1,111 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import { ButtonHTMLAttributes, forwardRef } from 'react'
 
-import { cn } from "src/lib/utils"
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'warning'
+    size?: 'sm' | 'md' | 'lg'
+    loading?: boolean
+    icon?: React.ReactNode
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Button.displayName = "Button"
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+    ({
+         variant = 'primary', size = 'md', loading, icon, children,
+         className, style, disabled, ...props
+     }, ref) => {
+        const base: React.CSSProperties = {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            fontFamily: 'var(--font)',
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+            border: 'none',
+            cursor: disabled || loading ? 'not-allowed' : 'pointer',
+            transition: 'all var(--transition)',
+            position: 'relative',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            userSelect: 'none',
+        }
 
-export { Button, buttonVariants }
+        const sizes = {
+            sm: { fontSize: 12, padding: '5px 10px', borderRadius: 'var(--radius-xs)' },
+            md: { fontSize: 13, padding: '8px 14px', borderRadius: 'var(--radius-sm)' },
+            lg: { fontSize: 14, padding: '11px 20px', borderRadius: 'var(--radius)' },
+        }
+
+        const variants: Record<string, React.CSSProperties> = {
+            primary: {
+                background: 'var(--text)',
+                color: '#fff',
+                boxShadow: 'var(--shadow-sm)',
+            },
+            secondary: {
+                background: 'var(--bg-surface)',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+            },
+            ghost: {
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+            },
+            danger: {
+                background: 'var(--danger-light)',
+                color: 'var(--danger)',
+                border: '1px solid #FECACA',
+            },
+            warning: {
+                background: 'var(--accent-light)',
+                color: 'var(--accent-dark)',
+                border: '1px solid #FDE68A',
+            },
+        }
+
+        return (
+            <button
+                ref={ref}
+                style={{
+                    ...base,
+                    ...sizes[size],
+                    ...variants[variant],
+                    opacity: disabled || loading ? 0.5 : 1,
+                    ...style,
+                }}
+                disabled={disabled || loading}
+                onMouseEnter={e => {
+                    if (disabled || loading) return
+                    const el = e.currentTarget
+                    if (variant === 'primary') el.style.opacity = '0.88'
+                    else if (variant === 'ghost') el.style.background = 'var(--bg-surface)'
+                    else if (variant === 'secondary') el.style.borderColor = 'var(--border-strong)'
+                }}
+                onMouseLeave={e => {
+                    if (disabled || loading) return
+                    const el = e.currentTarget
+                    el.style.opacity = '1'
+                    if (variant === 'ghost') el.style.background = 'transparent'
+                    if (variant === 'secondary') el.style.borderColor = 'var(--border)'
+                }}
+                onMouseDown={e => {
+                    if (disabled || loading) return
+                    e.currentTarget.style.transform = 'scale(0.98)'
+                }}
+                onMouseUp={e => {
+                    e.currentTarget.style.transform = 'scale(1)'
+                }}
+                {...props}
+            >
+                {loading ? (
+                    <span style={{
+                        width: 14, height: 14, border: '2px solid currentColor',
+                        borderTopColor: 'transparent', borderRadius: '50%',
+                        animation: 'spin 0.6s linear infinite', display: 'inline-block',
+                    }} />
+                ) : icon}
+                {children}
+            </button>
+        )
+    }
+)
+Button.displayName = 'Button'

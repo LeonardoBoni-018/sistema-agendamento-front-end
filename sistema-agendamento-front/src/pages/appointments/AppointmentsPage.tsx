@@ -8,20 +8,31 @@ import { FilaEspera } from '@/types/fila'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { AvaliacaoModal } from '@/components/shared/AvaliacaoModal'
 import { PagamentoCard } from '@/components/shared/PagamentoCard'
-import { FilaEsperaCard } from '@/components/shared/FilaEsperaCard'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useRealtimeAppointments } from '@/hooks/useRealtimeAppointments'
 import { useAuthStore } from '@/store/authStore'
 import { jobService } from '@/services/jobService'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, isToday, isTomorrow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-const FILTERS = [
+const FILTERS: { value: AppointmentStatus | ''; label: string }[] = [
     { value: '', label: 'Todos' },
     { value: 'PENDING', label: 'Pendentes' },
     { value: 'CONFIRMED', label: 'Confirmados' },
     { value: 'CANCELED', label: 'Cancelados' },
     { value: 'FINISHED', label: 'Finalizados' },
 ]
+
+function formatDate(dateStr: string) {
+    try {
+        const d = parseISO(dateStr)
+        if (isToday(d)) return 'Hoje'
+        if (isTomorrow(d)) return 'Amanhã'
+        return format(d, "dd 'de' MMM", { locale: ptBR })
+    } catch { return dateStr }
+}
 
 export function AppointmentsPage() {
     const navigate = useNavigate()
@@ -40,9 +51,7 @@ export function AppointmentsPage() {
 
     const { appointments, setAppointments } = useRealtimeAppointments(allData, {
         filterUserId: user?.id,
-        onFilaVaga: () => {
-            filaService.minhaFila().then(setFilas)
-        },
+        onFilaVaga: () => filaService.minhaFila().then(setFilas),
     })
 
     const load = useCallback(async () => {
@@ -76,25 +85,17 @@ export function AppointmentsPage() {
     }, [novaData, reagendando?.id])
 
     const handleCancel = async (id: number) => {
-        try {
-            await appointmentService.cancel(id)
-        } catch {
-            toast.error('Erro ao cancelar')
-        }
+        try { await appointmentService.cancel(id) }
+        catch { toast.error('Erro ao cancelar') }
     }
 
     const handleReagendar = async () => {
-        if (!reagendando || !novaData || !novoHorario) {
-            toast.error('Selecione data e horário')
-            return
-        }
+        if (!reagendando || !novaData || !novoHorario) return
         try {
             await appointmentService.reagendar(reagendando.id, novaData, novoHorario)
-            toast.success('Reagendado!')
+            toast.success('Reagendado com sucesso!')
             setReagendando(null)
-        } catch {
-            toast.error('Erro ao reagendar')
-        }
+        } catch { toast.error('Erro ao reagendar') }
     }
 
     const handleAvaliacaoSuccess = () => {
@@ -108,14 +109,19 @@ export function AppointmentsPage() {
         ? appointments.filter(a => a.status === filter)
         : appointments
 
-    const inputStyle = {
-        background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)', padding: '8px 10px',
-        fontSize: 13, color: 'var(--text)', outline: 'none',
+    const inputStyle: React.CSSProperties = {
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        padding: '8px 12px',
+        fontSize: 13, color: 'var(--text)',
+        fontFamily: 'var(--font)', outline: 'none',
+        transition: 'border-color var(--transition)',
+        boxShadow: 'var(--shadow-sm)',
     }
 
     return (
-        <div style={{ maxWidth: 900 }}>
+        <div style={{ maxWidth: 960 }}>
             {avaliando && (
                 <AvaliacaoModal
                     appointment={avaliando}
@@ -124,110 +130,164 @@ export function AppointmentsPage() {
                 />
             )}
 
-            <FilaEsperaCard
-                filas={filas}
-                onSair={id => setFilas(prev => prev.filter(f => f.id !== id))}
-            />
+            {/* Fila de espera banner */}
+            {filas.length > 0 && (
+                <div style={{
+                    background: 'var(--warning-light)',
+                    border: '1px solid #FDE68A',
+                    borderRadius: 'var(--radius)',
+                    padding: '12px 16px',
+                    marginBottom: 16,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    animation: 'slideInRight 0.3s ease both',
+                }}>
+                    <span style={{ fontSize: 16 }}>⏳</span>
+                    <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-dark)' }}>
+              {filas.length} fila{filas.length > 1 ? 's' : ''} de espera ativa{filas.length > 1 ? 's' : ''}
+            </span>
+                        <span style={{ fontSize: 12, color: 'var(--accent)', marginLeft: 6 }}>
+              Você será notificado ao abrir uma vaga
+            </span>
+                    </div>
+                    <Button variant="warning" size="sm" onClick={() => navigate('/fila')}>
+                        Ver fila
+                    </Button>
+                </div>
+            )}
 
+            {/* Header */}
             <div style={{
                 display: 'flex', alignItems: 'center',
-                justifyContent: 'space-between', marginBottom: 20, gap: 12,
+                justifyContent: 'space-between', marginBottom: 16, gap: 12,
             }}>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {FILTERS.map(f => (
                         <button
                             key={f.value}
-                            onClick={() => setFilter(f.value as AppointmentStatus | '')}
+                            onClick={() => setFilter(f.value)}
                             style={{
-                                padding: '6px 14px', borderRadius: 20,
+                                padding: '5px 12px', borderRadius: 100,
                                 fontSize: 12, fontWeight: 500, cursor: 'pointer',
                                 background: filter === f.value ? 'var(--text)' : 'var(--bg-card)',
-                                color: filter === f.value ? 'white' : 'var(--text-muted)',
+                                color: filter === f.value ? 'white' : 'var(--text-secondary)',
                                 border: `1px solid ${filter === f.value ? 'var(--text)' : 'var(--border)'}`,
+                                transition: 'all var(--transition)',
+                                fontFamily: 'var(--font)',
+                            }}
+                            onMouseEnter={e => {
+                                if (filter !== f.value) {
+                                    e.currentTarget.style.borderColor = 'var(--border-strong)'
+                                    e.currentTarget.style.color = 'var(--text)'
+                                }
+                            }}
+                            onMouseLeave={e => {
+                                if (filter !== f.value) {
+                                    e.currentTarget.style.borderColor = 'var(--border)'
+                                    e.currentTarget.style.color = 'var(--text-secondary)'
+                                }
                             }}
                         >
                             {f.label}
+                            {f.value && (
+                                <span style={{
+                                    marginLeft: 5, fontSize: 10, fontWeight: 700,
+                                    opacity: 0.6,
+                                }}>
+                  {appointments.filter(a => a.status === f.value).length}
+                </span>
+                            )}
                         </button>
                     ))}
                 </div>
-                <button onClick={() => navigate('/appointments/new')} style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                    background: 'var(--text)', color: 'white',
-                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                }}>
-                    <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                <Button
+                    onClick={() => navigate('/appointments/new')}
+                    icon={
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" strokeWidth={2.5}>
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    }
+                >
                     Novo agendamento
-                </button>
+                </Button>
             </div>
 
+            {/* Reagendamento */}
             {reagendando && (
-                <div style={{
-                    background: 'var(--bg-card)', border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius)', padding: '20px',
-                    marginBottom: 16, borderLeft: '3px solid var(--accent)',
+                <Card style={{
+                    marginBottom: 16,
+                    borderColor: 'var(--accent)',
+                    borderLeft: '3px solid var(--accent)',
+                    animation: 'fadeInScale 0.2s ease both',
                 }}>
                     <div style={{
                         display: 'flex', justifyContent: 'space-between',
                         alignItems: 'center', marginBottom: 14,
                     }}>
                         <div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
                                 Reagendar — {reagendando.jobName}
                             </div>
-                            <div style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 2 }}>
-                                Atual: {format(parseISO(reagendando.date), "dd/MM/yyyy", { locale: ptBR })} às {reagendando.time?.slice(0, 5)}
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                                Atual: {formatDate(reagendando.date)} às {reagendando.time?.slice(0, 5)}
                             </div>
                         </div>
-                        <button onClick={() => setReagendando(null)} style={{
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            color: 'var(--text-muted)', fontSize: 18,
-                        }}>
-                            <i className="ti ti-x" aria-hidden="true" />
-                        </button>
+                        <Button variant="ghost" size="sm" onClick={() => setReagendando(null)}>
+                            ✕
+                        </Button>
                     </div>
-                    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <label style={{
-                                fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                                textTransform: 'uppercase', letterSpacing: '0.06em',
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        <div>
+                            <div style={{
+                                fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
+                                textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5,
                             }}>
                                 Nova data
-                            </label>
+                            </div>
                             <input
                                 type="date"
                                 value={novaData}
                                 min={new Date().toISOString().split('T')[0]}
                                 onChange={e => setNovaData(e.target.value)}
                                 style={{ ...inputStyle, width: 160 }}
+                                onFocus={e => e.target.style.borderColor = 'var(--text)'}
+                                onBlur={e => e.target.style.borderColor = 'var(--border)'}
                             />
                         </div>
                         {novaData && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <label style={{
-                                    fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                            <div>
+                                <div style={{
+                                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
+                                    textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5,
                                 }}>
                                     Novo horário
-                                </label>
+                                </div>
                                 {loadingTimes ? (
-                                    <div style={{ fontSize: 12, color: 'var(--text-faint)', padding: '8px 0' }}>
-                                        Carregando...
+                                    <div style={{ display: 'flex', gap: 6 }}>
+                                        {[...Array(4)].map((_, i) => (
+                                            <div key={i} className="skeleton" style={{ width: 60, height: 32 }} />
+                                        ))}
                                     </div>
                                 ) : availableTimes.length === 0 ? (
-                                    <div style={{ fontSize: 12, color: 'var(--text-faint)', padding: '8px 0' }}>
-                                        Nenhum horário disponível
-                                    </div>
+                                    <Badge variant="muted">Nenhum horário disponível</Badge>
                                 ) : (
                                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                         {availableTimes.map(t => (
-                                            <button key={t} onClick={() => setNovoHorario(t)} style={{
-                                                padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                                                fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                                                background: novoHorario === t ? 'var(--text)' : 'var(--bg-surface)',
-                                                color: novoHorario === t ? 'white' : 'var(--text-muted)',
-                                                border: `1px solid ${novoHorario === t ? 'var(--text)' : 'var(--border)'}`,
-                                            }}>
+                                            <button
+                                                key={t}
+                                                onClick={() => setNovoHorario(t)}
+                                                style={{
+                                                    padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+                                                    fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                                                    background: novoHorario === t ? 'var(--text)' : 'var(--bg-surface)',
+                                                    color: novoHorario === t ? 'white' : 'var(--text-secondary)',
+                                                    border: `1px solid ${novoHorario === t ? 'var(--text)' : 'var(--border)'}`,
+                                                    transition: 'all var(--transition)',
+                                                    fontFamily: 'var(--font-mono)',
+                                                }}
+                                            >
                                                 {t?.slice(0, 5)}
                                             </button>
                                         ))}
@@ -236,107 +296,132 @@ export function AppointmentsPage() {
                             </div>
                         )}
                         {novaData && novoHorario && (
-                            <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 2 }}>
-                                <button onClick={handleReagendar} style={{
-                                    padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                                    background: 'var(--success)', color: 'white',
-                                    fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                                }}>
-                                    Confirmar
-                                </button>
+                            <div style={{ alignSelf: 'flex-end' }}>
+                                <Button onClick={handleReagendar} variant="primary">
+                                    Confirmar reagendamento
+                                </Button>
                             </div>
                         )}
                     </div>
-                </div>
+                </Card>
             )}
 
-            <div style={{
-                background: 'var(--bg-card)', border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)', overflow: 'hidden',
-            }}>
+            {/* Table */}
+            <Card padding={0} style={{ overflow: 'hidden' }}>
                 {loading ? (
-                    <div style={{ padding: 20 }}>
+                    <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {[...Array(4)].map((_, i) => (
-                            <div key={i} style={{
-                                height: 56, background: 'var(--bg-surface)',
-                                borderRadius: 'var(--radius-sm)', marginBottom: 8,
-                            }} />
+                            <div key={i} className="skeleton" style={{ height: 52 }} />
                         ))}
                     </div>
                 ) : displayed.length === 0 ? (
-                    <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-                        <div style={{ fontSize: 36, marginBottom: 10 }}>🗓</div>
-                        <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
-                            Nenhum agendamento encontrado
-                        </div>
-                        <button onClick={() => navigate('/appointments/new')} style={{
-                            padding: '9px 20px', borderRadius: 'var(--radius-sm)',
-                            background: 'var(--text)', color: 'white',
-                            fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
+                    <div style={{ padding: '64px 20px', textAlign: 'center' }}>
+                        <div style={{
+                            width: 48, height: 48, background: 'var(--bg-surface)',
+                            borderRadius: 12, margin: '0 auto 14px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                            Criar agendamento
-                        </button>
+                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24"
+                                 stroke="var(--text-muted)" strokeWidth={1.5}>
+                                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                <path d="M16 2v4M8 2v4M3 10h18"/>
+                            </svg>
+                        </div>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                            Nenhum agendamento
+                        </p>
+                        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+                            {filter ? `Nenhum agendamento ${FILTERS.find(f => f.value === filter)?.label.toLowerCase()}` : 'Você ainda não fez nenhum agendamento'}
+                        </p>
+                        <Button onClick={() => navigate('/appointments/new')}>
+                            Criar primeiro agendamento
+                        </Button>
                     </div>
                 ) : (
                     <>
+                        {/* Table header */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '2fr 1fr 80px 90px 100px 1fr',
-                            padding: '10px 20px', borderBottom: '1px solid var(--border)',
-                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase',
+                            gridTemplateColumns: '2fr 100px 72px 90px 110px 140px',
+                            padding: '9px 20px',
+                            borderBottom: '1px solid var(--border)',
+                            background: 'var(--bg-surface)',
                         }}>
-                            <span>Serviço</span><span>Data</span><span>Hora</span>
-                            <span>Valor</span><span>Status</span><span>Ações</span>
+                            {['Serviço', 'Data', 'Hora', 'Valor', 'Status', 'Ações'].map(h => (
+                                <span key={h} style={{
+                                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
+                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                }}>
+                  {h}
+                </span>
+                            ))}
                         </div>
+
                         {displayed.map((a) => (
                             <div key={a.id}>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '2fr 1fr 80px 90px 100px 1fr',
-                                    padding: '14px 20px', alignItems: 'center',
-                                    borderBottom: '1px solid var(--border)',
-                                    transition: 'background 0.1s',
-                                }}
-                                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-surface)')}
-                                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '2fr 100px 72px 90px 110px 140px',
+                                        padding: '13px 20px', alignItems: 'center',
+                                        borderBottom: '1px solid var(--border)',
+                                        transition: 'background var(--transition)',
+                                        cursor: 'default',
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                 >
                                     <div>
-                                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                        <div style={{
+                                            fontSize: 13, fontWeight: 600, color: 'var(--text)',
+                                            letterSpacing: '-0.01em',
+                                        }}>
                                             {a.jobName}
                                         </div>
                                         {a.funcionarioNome && (
-                                            <div style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                                                {a.funcionarioNome}
+                                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                                                {a.funcionarioNome} · {a.jobDurationMinutes}min
                                             </div>
                                         )}
                                     </div>
-                                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                                        {format(parseISO(a.date), "dd MMM yy", { locale: ptBR })}
+                                    <div style={{
+                                        fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500,
+                                    }}>
+                                        {formatDate(a.date)}
                                     </div>
                                     <div style={{
-                                        fontSize: 13, color: 'var(--text-muted)',
-                                        fontVariantNumeric: 'tabular-nums',
+                                        fontSize: 12, color: 'var(--text-secondary)',
+                                        fontFamily: 'var(--font-mono)',
                                     }}>
                                         {a.time?.slice(0, 5)}
                                     </div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                                    <div style={{
+                                        fontSize: 13, fontWeight: 700, color: 'var(--text)',
+                                        letterSpacing: '-0.02em',
+                                    }}>
                                         R$ {Number(a.jobPrice).toFixed(2)}
                                     </div>
                                     <StatusBadge status={a.status} />
-                                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
                                         {(a.status === 'PENDING' || a.status === 'CONFIRMED') && (
                                             <>
                                                 <button
-                                                    onClick={() => {
-                                                        setReagendando(a)
-                                                        setNovaData('')
-                                                        setNovoHorario('')
-                                                    }}
+                                                    onClick={() => { setReagendando(a); setNovaData(''); setNovoHorario('') }}
                                                     style={{
                                                         fontSize: 11, fontWeight: 600,
-                                                        color: 'var(--accent-dark)',
+                                                        color: 'var(--text-secondary)',
                                                         background: 'none', border: 'none', cursor: 'pointer',
+                                                        padding: '3px 6px', borderRadius: 4,
+                                                        transition: 'all var(--transition)',
+                                                        fontFamily: 'var(--font)',
+                                                    }}
+                                                    onMouseEnter={e => {
+                                                        e.currentTarget.style.background = 'var(--bg-surface)'
+                                                        e.currentTarget.style.color = 'var(--text)'
+                                                    }}
+                                                    onMouseLeave={e => {
+                                                        e.currentTarget.style.background = 'none'
+                                                        e.currentTarget.style.color = 'var(--text-secondary)'
                                                     }}
                                                 >
                                                     Reagendar
@@ -346,18 +431,24 @@ export function AppointmentsPage() {
                                                     style={{
                                                         fontSize: 11, fontWeight: 600, color: 'var(--danger)',
                                                         background: 'none', border: 'none', cursor: 'pointer',
+                                                        padding: '3px 6px', borderRadius: 4,
+                                                        transition: 'all var(--transition)',
+                                                        fontFamily: 'var(--font)',
                                                     }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-light)'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
                                                 >
                                                     Cancelar
                                                 </button>
                                                 <button
-                                                    onClick={() => setExpandedPayment(
-                                                        expandedPayment === a.id ? null : a.id
-                                                    )}
+                                                    onClick={() => setExpandedPayment(expandedPayment === a.id ? null : a.id)}
                                                     style={{
-                                                        fontSize: 11, fontWeight: 600, color: '#2563EB',
+                                                        fontSize: 11, color: 'var(--info)',
                                                         background: 'none', border: 'none', cursor: 'pointer',
+                                                        padding: '3px', borderRadius: 4,
+                                                        transition: 'all var(--transition)',
                                                     }}
+                                                    data-tooltip="Pagamento"
                                                 >
                                                     💳
                                                 </button>
@@ -369,20 +460,29 @@ export function AppointmentsPage() {
                                                 style={{
                                                     fontSize: 11, fontWeight: 600, color: '#F59E0B',
                                                     background: 'none', border: 'none', cursor: 'pointer',
+                                                    padding: '3px 6px', borderRadius: 4,
+                                                    transition: 'all var(--transition)',
+                                                    fontFamily: 'var(--font)',
                                                 }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#FEF3C7'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'none'}
                                             >
                                                 ★ Avaliar
                                             </button>
                                         )}
                                         {a.status === 'FINISHED' && a.jaAvaliou && (
-                                            <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                        ★ Avaliado
-                      </span>
+                                            <Badge variant="muted">★ Avaliado</Badge>
                                         )}
                                     </div>
                                 </div>
+
                                 {expandedPayment === a.id && (
-                                    <div style={{ padding: '0 20px 12px' }}>
+                                    <div style={{
+                                        padding: '0 20px 12px',
+                                        borderBottom: '1px solid var(--border)',
+                                        background: 'var(--bg-surface)',
+                                        animation: 'fadeIn 0.2s ease both',
+                                    }}>
                                         <PagamentoCard appointment={a} />
                                     </div>
                                 )}
@@ -390,35 +490,27 @@ export function AppointmentsPage() {
                         ))}
                     </>
                 )}
-            </div>
+            </Card>
 
-            <div style={{
-                marginTop: 16, background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)', padding: '14px 20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-                <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
-                        Horário esgotado?
+            {/* Entrar na fila CTA */}
+            <Card style={{ marginTop: 12 }}>
+                <div style={{
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between', gap: 16,
+                }}>
+                    <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>
+                            Horário esgotado?
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                            Entre na fila e seja notificado quando uma vaga abrir
+                        </div>
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                        Entre na fila de espera e seja notificado quando uma vaga abrir
-                    </div>
+                    <Button variant="warning" onClick={() => navigate('/fila')}>
+                        ⏳ Entrar na fila
+                    </Button>
                 </div>
-                <button
-                    onClick={() => navigate('/fila')}
-                    style={{
-                        padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                        background: '#FEF3C7', color: '#92400E',
-                        fontSize: 12, fontWeight: 600,
-                        border: '1px solid #FDE68A', cursor: 'pointer',
-                        flexShrink: 0,
-                    }}
-                >
-                    ⏳ Entrar na fila
-                </button>
-            </div>
+            </Card>
         </div>
     )
 }

@@ -1,36 +1,38 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+export type BadgeVariant = 'default' | 'success' | 'danger' | 'warning' | 'info' | 'muted'
 
-import { cn } from "src/lib/utils"
-
-const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-  {
-    variants: {
-      variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
-
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
-
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+const configs: Record<BadgeVariant, { bg: string; color: string; border: string }> = {
+    default: { bg: 'var(--bg-surface)', color: 'var(--text-secondary)', border: 'var(--border)' },
+    success: { bg: 'var(--success-light)', color: '#065F46', border: '#A7F3D0' },
+    danger: { bg: 'var(--danger-light)', color: '#991B1B', border: '#FECACA' },
+    warning: { bg: 'var(--warning-light)', color: '#92400E', border: '#FDE68A' },
+    info: { bg: 'var(--info-light)', color: '#1E40AF', border: '#BFDBFE' },
+    muted: { bg: '#F4F4F5', color: 'var(--text-muted)', border: '#E4E4E7' },
 }
 
-export { Badge, badgeVariants }
+interface BadgeProps {
+    variant?: BadgeVariant
+    children: React.ReactNode
+    dot?: boolean
+    style?: React.CSSProperties
+}
+
+export function Badge({ variant = 'default', children, dot, style }: BadgeProps) {
+    const { bg, color, border } = configs[variant]
+    return (
+        <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            fontSize: 11, fontWeight: 600, letterSpacing: '0.02em',
+            padding: '3px 8px', borderRadius: 100,
+            background: bg, color, border: `1px solid ${border}`,
+            whiteSpace: 'nowrap', ...style,
+        }}>
+      {dot && (
+          <span style={{
+              width: 5, height: 5, borderRadius: '50%',
+              background: color, flexShrink: 0,
+          }} />
+      )}
+            {children}
+    </span>
+    )
+}
