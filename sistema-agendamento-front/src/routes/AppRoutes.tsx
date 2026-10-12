@@ -7,6 +7,7 @@ import { DashboardLayout } from 'src/components/layout/DashboardLayout'
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage })))
 const AgendamentoPublicoPage = lazy(() => import('@/pages/publico/AgendamentoPublicoPage').then(m => ({ default: m.AgendamentoPublicoPage })))
 const PagamentoRetornoPage = lazy(() => import('@/pages/pagamento/PagamentoRetornoPage').then(m => ({ default: m.PagamentoRetornoPage })))
+const SetupPage = lazy(() => import('@/pages/auth/SetupPage').then(m => ({ default: m.SetupPage })))
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const AppointmentsPage = lazy(() => import('@/pages/appointments/AppointmentsPage').then(m => ({ default: m.AppointmentsPage })))
 const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then(m => ({ default: m.NewAppointmentPage })))
@@ -35,6 +36,7 @@ export function AppRoutes() {
             <Routes>
                 {/* Públicas */}
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/setup" element={<SetupPage />} />
                 <Route path="/agendar/:comercioId" element={<AgendamentoPublicoPage />} />
                 <Route path="/pagamento/sucesso" element={<PagamentoRetornoPage />} />
                 <Route path="/pagamento/erro" element={<PagamentoRetornoPage />} />
