@@ -38,7 +38,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         style={{
                             width: '100%',
                             background: 'var(--bg-card)',
-                            border: `1px solid ${error ? 'var(--danger)' : focused ? 'var(--text)' : 'var(--border)'}`,
+                            border: `1px solid ${error ? 'var(--danger)' : focused ? 'var(--accent)' : 'var(--border)'}`,
                             borderRadius: 'var(--radius-sm)',
                             padding: icon ? '9px 12px 9px 34px' : '9px 12px',
                             fontSize: 13,
@@ -47,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                             outline: 'none',
                             transition: 'border-color var(--transition), box-shadow var(--transition)',
                             boxShadow: focused
-                                ? `0 0 0 3px ${error ? 'rgba(220,38,38,0.1)' : 'rgba(217,119,6,0.12)'}`
+                                ? `0 0 0 3px ${error ? 'var(--danger-light)' : 'var(--accent-light)'}`
                                 : 'var(--shadow-sm)',
                             ...style,
                         }}

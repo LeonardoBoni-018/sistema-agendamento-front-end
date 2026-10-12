@@ -186,7 +186,7 @@ export function NewAppointmentPage() {
                                             padding: '7px 14px', borderRadius: 'var(--radius-sm)',
                                             fontSize: 13, fontWeight: 500, cursor: 'pointer',
                                             background: watchedTime === t ? 'var(--text)' : 'var(--bg-surface)',
-                                            color: watchedTime === t ? 'white' : 'var(--text-muted)',
+                                            color: watchedTime === t ? 'var(--on-strong)' : 'var(--text-muted)',
                                             border: `1px solid ${watchedTime === t ? 'var(--text)' : 'var(--border)'}`,
                                         }}
                                     >
@@ -225,7 +225,7 @@ export function NewAppointmentPage() {
                             style={{
                                 padding: '9px 20px', borderRadius: 'var(--radius-sm)',
                                 fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                background: 'var(--text)', color: 'white',
+                                background: 'var(--accent)', color: 'var(--on-accent)',
                                 border: 'none', opacity: isSubmitting ? 0.6 : 1,
                             }}
                         >

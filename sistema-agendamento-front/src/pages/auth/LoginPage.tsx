@@ -9,6 +9,7 @@ import { comercioService } from '@/services/comercioService'
 import { useAuthStore } from '@/store/authStore'
 import { userService } from '@/services/userService'
 import { Comercio } from '@/types/comercio'
+import { CalendarCheck } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -91,78 +92,72 @@ export function LoginPage() {
             minHeight: '100vh', display: 'flex',
             background: 'var(--bg)', fontFamily: 'var(--font)',
         }}>
-            {/* Left panel */}
-            <div style={{
-                flex: 1, display: 'flex', flexDirection: 'column',
+            {/* Painel de marca */}
+            <div className="login-brand" style={{
+                flex: 1, flexDirection: 'column',
                 justifyContent: 'space-between', padding: 48,
-                background: 'var(--text)', position: 'relative',
-                overflow: 'hidden',
+                background: 'var(--bg-card)', borderRight: '1px solid var(--border)',
+                position: 'relative', overflow: 'hidden',
             }}>
-                {/* Background pattern */}
                 <div style={{
-                    position: 'absolute', inset: 0, opacity: 0.04,
-                    backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-                    backgroundSize: '32px 32px',
+                    position: 'absolute', inset: 0, opacity: 0.9,
+                    background: 'radial-gradient(40rem 26rem at 20% 0%, var(--glow), transparent 70%)',
                 }} />
 
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 10,
-                        marginBottom: 48,
-                    }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 56 }}>
                         <div style={{
-                            width: 36, height: 36, borderRadius: 10,
-                            background: 'white', display: 'flex',
-                            alignItems: 'center', justifyContent: 'center',
+                            width: 34, height: 34, borderRadius: 9,
+                            background: 'var(--accent)', color: 'var(--on-accent)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 0 24px -4px var(--accent)',
                         }}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
-                                      stroke="var(--text)" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
+                            <CalendarCheck size={17} strokeWidth={2.25} />
                         </div>
-                        <span style={{
-                            fontSize: 15, fontWeight: 700, color: 'white',
-                            letterSpacing: '-0.02em',
-                        }}>
-              Sistema Agendamento
-            </span>
+                        <span style={{ fontSize: 15, fontWeight: 650, letterSpacing: '-0.02em' }}>
+                            Agenda
+                        </span>
                     </div>
 
                     <h1 style={{
-                        fontSize: 36, fontWeight: 700, color: 'white',
-                        letterSpacing: '-0.04em', lineHeight: 1.15,
-                        marginBottom: 16,
+                        fontSize: 'clamp(30px, 3.4vw, 44px)', fontWeight: 650,
+                        letterSpacing: '-0.045em', lineHeight: 1.05, marginBottom: 18,
                     }}>
-                        Organize.<br />Confirme.<br />Cresça.
+                        Cada horário,<br />
+                        <span style={{ color: 'var(--accent)' }}>sob controle.</span>
                     </h1>
-                    <p style={{
-                        fontSize: 15, color: 'rgba(255,255,255,0.5)',
-                        lineHeight: 1.6, maxWidth: 320,
-                    }}>
-                        Gerencie agendamentos, clientes e serviços em um sistema completo e moderno.
+                    <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 360 }}>
+                        Agenda online, fila de espera inteligente e pagamento antecipado.
+                        Tudo sincronizado em tempo real com a sua equipe.
                     </p>
                 </div>
 
+                {/* Linha do tempo ilustrativa */}
                 <div style={{ position: 'relative', zIndex: 1 }}>
                     {[
-                        { num: '100%', label: 'Notificações em tempo real' },
-                        { num: 'Multi', label: 'Suporte a vários comércios' },
-                        { num: 'Zero', label: 'Configuração técnica necessária' },
-                    ].map(({ num, label }) => (
-                        <div key={label} style={{
-                            display: 'flex', alignItems: 'center', gap: 16,
-                            padding: '14px 0',
-                            borderTop: '1px solid rgba(255,255,255,0.08)',
+                        { t: '09:00', n: 'Corte + barba', s: 'confirmado', on: true },
+                        { t: '10:30', n: 'Coloração', s: 'aguardando', on: false },
+                        { t: '11:15', n: 'Vaga liberada', s: 'fila notificada', on: true },
+                    ].map(({ t, n, s: st, on }) => (
+                        <div key={t} style={{
+                            display: 'flex', alignItems: 'center', gap: 14,
+                            padding: '12px 14px', marginBottom: 8,
+                            border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+                            background: 'var(--bg-surface)',
                         }}>
-                            <div style={{
-                                fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.9)',
-                                minWidth: 56, letterSpacing: '-0.02em',
+                            <span className="mono" style={{ fontSize: 13, color: 'var(--accent)', minWidth: 42 }}>{t}</span>
+                            <span style={{ fontSize: 13.5, fontWeight: 500, flex: 1 }}>{n}</span>
+                            <span className="mono" style={{
+                                fontSize: 10.5, letterSpacing: '0.04em', textTransform: 'uppercase',
+                                color: on ? 'var(--success)' : 'var(--text-muted)',
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
                             }}>
-                                {num}
-                            </div>
-                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-                                {label}
-                            </div>
+                                <span style={{
+                                    width: 6, height: 6, borderRadius: '50%',
+                                    background: on ? 'var(--success)' : 'var(--text-faint)',
+                                }} />
+                                {st}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -289,7 +284,7 @@ export function LoginPage() {
                                 <select
                                     style={selectStyle}
                                     {...registerForm.register('comercioId')}
-                                    onFocus={e => e.target.style.borderColor = 'var(--text)'}
+                                    onFocus={e => e.target.style.borderColor = 'var(--accent)'}
                                     onBlur={e => e.target.style.borderColor = 'var(--border)'}
                                 >
                                     <option value="">Selecione um comércio</option>

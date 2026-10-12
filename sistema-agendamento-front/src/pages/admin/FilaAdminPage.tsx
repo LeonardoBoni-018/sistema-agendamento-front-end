@@ -69,10 +69,10 @@ export function FilaAdminPage() {
                                     }}>
                                         <div style={{
                                             width: 28, height: 28, borderRadius: '50%',
-                                            background: '#FEF3C7',
+                                            background: 'var(--accent-light)',
                                             display: 'flex', alignItems: 'center',
                                             justifyContent: 'center', fontSize: 11,
-                                            fontWeight: 700, color: '#92400E', flexShrink: 0,
+                                            fontWeight: 700, color: 'var(--accent-dark)', flexShrink: 0,
                                         }}>
                                             {f.posicao}º
                                         </div>

@@ -34,35 +34,35 @@ export function PagamentoRetornoPage() {
             icon: '✅',
             title: 'Pagamento aprovado!',
             desc: 'Seu agendamento foi confirmado com sucesso.',
-            color: '#059669',
-            bg: '#D1FAE5',
+            color: 'var(--success)',
+            bg: 'var(--success-light)',
         },
         erro: {
             icon: '❌',
             title: 'Pagamento recusado',
             desc: 'Houve um problema com seu pagamento. Tente novamente.',
-            color: '#DC2626',
-            bg: '#FEE2E2',
+            color: 'var(--danger)',
+            bg: 'var(--danger-light)',
         },
         pendente: {
             icon: '⏳',
             title: 'Pagamento em análise',
             desc: 'Seu pagamento está sendo processado. Você será notificado em breve.',
-            color: '#D97706',
-            bg: '#FEF3C7',
+            color: 'var(--accent)',
+            bg: 'var(--accent-light)',
         },
     }[resultado]
 
     return (
         <div style={{
-            minHeight: '100vh', background: '#F9FAFB',
+            minHeight: '100vh', background: 'var(--bg-surface)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: 24,
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}>
             <div style={{
-                background: 'white', borderRadius: 16,
-                border: '1px solid #E5E7EB',
+                background: 'var(--bg-card)', borderRadius: 16,
+                border: '1px solid var(--border)',
                 padding: 32, maxWidth: 400, width: '100%', textAlign: 'center',
             }}>
                 <div style={{
@@ -74,24 +74,24 @@ export function PagamentoRetornoPage() {
                     {config.icon}
                 </div>
                 <div style={{
-                    fontSize: 20, fontWeight: 600, color: '#111827', marginBottom: 8,
+                    fontSize: 20, fontWeight: 600, color: 'var(--text)', marginBottom: 8,
                 }}>
                     {config.title}
                 </div>
-                <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 24 }}>
+                <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
                     {config.desc}
                 </div>
 
                 {pagamento && (
                     <div style={{
-                        background: '#F9FAFB', borderRadius: 8,
+                        background: 'var(--bg-surface)', borderRadius: 8,
                         padding: '12px 16px', marginBottom: 20, textAlign: 'left',
                     }}>
                         <div style={{
                             display: 'flex', justifyContent: 'space-between',
                             fontSize: 13, marginBottom: 4,
                         }}>
-                            <span style={{ color: '#6B7280' }}>Valor</span>
+                            <span style={{ color: 'var(--text-muted)' }}>Valor</span>
                             <span style={{ fontWeight: 600 }}>
                 R$ {Number(pagamento.valor).toFixed(2)}
               </span>
@@ -99,7 +99,7 @@ export function PagamentoRetornoPage() {
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', fontSize: 13,
                         }}>
-                            <span style={{ color: '#6B7280' }}>Status</span>
+                            <span style={{ color: 'var(--text-muted)' }}>Status</span>
                             <span style={{ fontWeight: 600, color: config.color }}>
                 {pagamento.status}
               </span>
@@ -111,8 +111,8 @@ export function PagamentoRetornoPage() {
                     onClick={() => navigate('/appointments')}
                     style={{
                         width: '100%', padding: '11px',
-                        borderRadius: 8, background: '#1C1917',
-                        color: 'white', fontSize: 14, fontWeight: 600,
+                        borderRadius: 8, background: 'var(--text)',
+                        color: 'var(--on-strong)', fontSize: 14, fontWeight: 600,
                         border: 'none', cursor: 'pointer',
                     }}
                 >

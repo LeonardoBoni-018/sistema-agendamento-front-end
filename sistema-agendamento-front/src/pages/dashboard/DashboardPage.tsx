@@ -76,14 +76,14 @@ function CustomTooltip({ active, payload, label }: any) {
     if (!active || !payload?.length) return null
     return (
         <div style={{
-            background: 'var(--text)', color: 'white',
+            background: 'var(--accent)', color: 'var(--on-accent)',
             padding: '8px 12px', borderRadius: 8,
             fontSize: 12, fontWeight: 500,
             boxShadow: 'var(--shadow-lg)',
         }}>
-            <div style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 2 }}>{label}</div>
+            <div style={{ color: 'var(--on-strong)', opacity: 0.65, marginBottom: 2 }}>{label}</div>
             {payload.map((p: any) => (
-                <div key={p.name} style={{ color: 'white' }}>
+                <div key={p.name} style={{ color: 'var(--on-strong)' }}>
                     {p.name === 'receita' ? `R$ ${Number(p.value).toFixed(2)}` : p.value}
                 </div>
             ))}
@@ -145,7 +145,7 @@ export function DashboardPage() {
         .filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED')
         .slice(0, 6)
 
-    const PIE_COLORS = ['#059669', '#D97706', '#DC2626', '#71717A']
+    const PIE_COLORS = ['var(--success)', 'var(--accent)', 'var(--danger)', 'var(--text-muted)']
     const pieData = analytics ? [
         { name: 'Confirmados', value: analytics.agendamentosConfirmados },
         { name: 'Pendentes', value: analytics.agendamentosPendentes },
@@ -162,7 +162,7 @@ export function DashboardPage() {
                     fontSize: 22, fontWeight: 700, color: 'var(--text)',
                     letterSpacing: '-0.03em', marginBottom: 2,
                 }}>
-                    {greeting}, {user?.name?.split(' ')[0]} ✦
+                    {greeting}, {user?.name?.split(" ")[0]}
                 </h2>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                     {format(new Date(), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })} · {user?.comercioNome}
@@ -212,7 +212,7 @@ export function DashboardPage() {
                             label="Avaliação média"
                             value={analytics.mediaAvaliacao ? `${analytics.mediaAvaliacao} ★` : '—'}
                             sub={`${analytics.totalAvaliacoes} avaliações`}
-                            color="#F59E0B"
+                            color="var(--accent)"
                             icon={
                                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -249,8 +249,8 @@ export function DashboardPage() {
                                            margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="receitaGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#059669" stopOpacity={0.15}/>
-                                            <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
+                                            <stop offset="5%" stopColor="var(--success)" stopOpacity={0.15}/>
+                                            <stop offset="95%" stopColor="var(--success)" stopOpacity={0}/>
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
@@ -258,9 +258,9 @@ export function DashboardPage() {
                                     <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}
                                            tickFormatter={v => `R$${v}`}/>
                                     <Tooltip content={<CustomTooltip />}/>
-                                    <Area type="monotone" dataKey="receita" stroke="#059669" strokeWidth={2}
-                                          fill="url(#receitaGrad)" dot={{ fill: '#059669', strokeWidth: 0, r: 3 }}
-                                          activeDot={{ r: 5, fill: '#059669' }}/>
+                                    <Area type="monotone" dataKey="receita" stroke="var(--success)" strokeWidth={2}
+                                          fill="url(#receitaGrad)" dot={{ fill: 'var(--success)', strokeWidth: 0, r: 3 }}
+                                          activeDot={{ r: 5, fill: 'var(--success)' }}/>
                                 </AreaChart>
                             </ResponsiveContainer>
                         </Card>
@@ -342,7 +342,7 @@ export function DashboardPage() {
                                     <XAxis dataKey="dia" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false}/>
                                     <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false}/>
                                     <Tooltip content={<CustomTooltip />}/>
-                                    <Bar dataKey="quantidade" fill="var(--text)" radius={[4, 4, 0, 0]}
+                                    <Bar dataKey="quantidade" fill="var(--accent)" radius={[4, 4, 0, 0]}
                                          maxBarSize={32}/>
                                 </BarChart>
                             </ResponsiveContainer>
@@ -507,7 +507,7 @@ export function DashboardPage() {
 
             {/* Cancelados recentes — apenas usuário */}
             {!admin && canceled > 0 && (
-                <Card style={{ borderColor: '#FECACA', background: 'var(--danger-light)' }}>
+                <Card style={{ borderColor: 'var(--danger-light)', background: 'var(--danger-light)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--danger)" strokeWidth={2}>
                             <circle cx="12" cy="12" r="10"/>

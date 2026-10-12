@@ -134,7 +134,7 @@ export function AppointmentsPage() {
             {filas.length > 0 && (
                 <div style={{
                     background: 'var(--warning-light)',
-                    border: '1px solid #FDE68A',
+                    border: '1px solid var(--accent-light)',
                     borderRadius: 'var(--radius)',
                     padding: '12px 16px',
                     marginBottom: 16,
@@ -170,7 +170,7 @@ export function AppointmentsPage() {
                                 padding: '5px 12px', borderRadius: 100,
                                 fontSize: 12, fontWeight: 500, cursor: 'pointer',
                                 background: filter === f.value ? 'var(--text)' : 'var(--bg-card)',
-                                color: filter === f.value ? 'white' : 'var(--text-secondary)',
+                                color: filter === f.value ? 'var(--on-strong)' : 'var(--text-secondary)',
                                 border: `1px solid ${filter === f.value ? 'var(--text)' : 'var(--border)'}`,
                                 transition: 'all var(--transition)',
                                 fontFamily: 'var(--font)',
@@ -282,7 +282,7 @@ export function AppointmentsPage() {
                                                     padding: '6px 12px', borderRadius: 'var(--radius-sm)',
                                                     fontSize: 12, fontWeight: 600, cursor: 'pointer',
                                                     background: novoHorario === t ? 'var(--text)' : 'var(--bg-surface)',
-                                                    color: novoHorario === t ? 'white' : 'var(--text-secondary)',
+                                                    color: novoHorario === t ? 'var(--on-strong)' : 'var(--text-secondary)',
                                                     border: `1px solid ${novoHorario === t ? 'var(--text)' : 'var(--border)'}`,
                                                     transition: 'all var(--transition)',
                                                     fontFamily: 'var(--font-mono)',
@@ -458,13 +458,13 @@ export function AppointmentsPage() {
                                             <button
                                                 onClick={() => setAvaliando(a)}
                                                 style={{
-                                                    fontSize: 11, fontWeight: 600, color: '#F59E0B',
+                                                    fontSize: 11, fontWeight: 600, color: 'var(--accent)',
                                                     background: 'none', border: 'none', cursor: 'pointer',
                                                     padding: '3px 6px', borderRadius: 4,
                                                     transition: 'all var(--transition)',
                                                     fontFamily: 'var(--font)',
                                                 }}
-                                                onMouseEnter={e => e.currentTarget.style.background = '#FEF3C7'}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'var(--accent-light)'}
                                                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
                                             >
                                                 ★ Avaliar

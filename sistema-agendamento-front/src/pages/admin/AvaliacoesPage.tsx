@@ -72,7 +72,7 @@ export function AvaliacoesPage() {
                                     width: avaliacoes.length > 0
                                         ? `${(qty / avaliacoes.length) * 100}%` : '0%',
                                     background: filtroNota === nota
-                                        ? '#F59E0B' : 'var(--text)',
+                                        ? 'var(--accent)' : 'var(--text)',
                                     borderRadius: 3, transition: 'width 0.4s ease',
                                 }} />
                             </div>

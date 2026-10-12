@@ -1,5 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { NotificationBell } from '@/components/shared/NotificationBell'
+import { Menu } from 'lucide-react'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { useAuthStore } from '@/store/authStore'
 
 const pageMeta: Record<string, { title: string; desc: string }> = {
@@ -17,26 +19,33 @@ const pageMeta: Record<string, { title: string; desc: string }> = {
     '/profile': { title: 'Perfil', desc: 'Suas informações' },
 }
 
-export function Header() {
+export function Header({ onMenu }: { onMenu: () => void }) {
     const location = useLocation()
     const { user } = useAuthStore()
     const meta = pageMeta[location.pathname] ?? { title: 'Sistema', desc: '' }
 
     return (
-        <header style={{
+        <header className="app-header" style={{
             height: 56,
             borderBottom: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 24px',
-            background: 'rgba(250,250,249,0.8)',
-            backdropFilter: 'blur(12px)',
+            background: 'color-mix(in srgb, var(--bg) 80%, transparent)',
+            backdropFilter: 'blur(14px)',
             position: 'sticky',
             top: 0,
             zIndex: 10,
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button className="app-menu-btn" onClick={onMenu} aria-label="Abrir menu" style={{
+                    width: 34, height: 34, alignItems: 'center', justifyContent: 'center',
+                    background: 'transparent', border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)', color: 'var(--text)', cursor: 'pointer',
+                }}>
+                    <Menu size={16} />
+                </button>
                 <div>
                     <h1 style={{
                         fontSize: 15, fontWeight: 600, color: 'var(--text)',
@@ -53,6 +62,7 @@ export function Header() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ThemeToggle />
                 <NotificationBell />
                 <div style={{
                     height: 20, width: 1, background: 'var(--border)', margin: '0 4px',
@@ -61,7 +71,7 @@ export function Header() {
                     width: 30, height: 30, borderRadius: '50%',
                     background: 'var(--accent-light)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, color: 'var(--accent-dark)',
+                    fontSize: 11, fontWeight: 700, color: 'var(--accent-dark)', fontFamily: 'var(--font-mono)',
                     cursor: 'default',
                 }}
                      data-tooltip={user?.name}

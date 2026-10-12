@@ -117,7 +117,7 @@ export function AvaliacaoModal({ appointment, onClose, onSuccess }: Props) {
                             borderRadius: 'var(--radius-sm)',
                             fontSize: 13, fontWeight: 600, cursor: 'pointer',
                             background: nota > 0 ? 'var(--text)' : 'var(--border)',
-                            color: 'white', border: 'none',
+                            color: 'var(--on-strong)', border: 'none',
                             opacity: loading ? 0.6 : 1,
                         }}
                     >

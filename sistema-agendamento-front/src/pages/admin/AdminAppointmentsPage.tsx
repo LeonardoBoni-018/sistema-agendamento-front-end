@@ -70,7 +70,7 @@ export function AdminAppointmentsPage() {
                         padding: '6px 14px', borderRadius: 20,
                         fontSize: 12, fontWeight: 500, cursor: 'pointer',
                         background: filter === f.value ? 'var(--text)' : 'var(--bg-card)',
-                        color: filter === f.value ? 'white' : 'var(--text-muted)',
+                        color: filter === f.value ? 'var(--on-strong)' : 'var(--text-muted)',
                         border: `1px solid ${filter === f.value ? 'var(--text)' : 'var(--border)'}`,
                     }}>
                         {f.label}

@@ -9,11 +9,11 @@ interface Props {
 }
 
 const statusConfig: Record<PagamentoStatus, { label: string; color: string; bg: string }> = {
-    PENDENTE: { label: 'Aguardando pagamento', color: '#92400E', bg: '#FEF3C7' },
-    APROVADO: { label: 'Pago ✅', color: '#065F46', bg: '#D1FAE5' },
-    REJEITADO: { label: 'Pagamento recusado', color: '#991B1B', bg: '#FEE2E2' },
-    CANCELADO: { label: 'Cancelado', color: '#6B7280', bg: '#F3F4F6' },
-    REEMBOLSADO: { label: 'Reembolsado', color: '#1E40AF', bg: '#DBEAFE' },
+    PENDENTE: { label: 'Aguardando pagamento', color: 'var(--accent-dark)', bg: 'var(--accent-light)' },
+    APROVADO: { label: 'Pago ✅', color: 'var(--success)', bg: 'var(--success-light)' },
+    REJEITADO: { label: 'Pagamento recusado', color: 'var(--danger)', bg: 'var(--danger-light)' },
+    CANCELADO: { label: 'Cancelado', color: 'var(--text-muted)', bg: 'var(--bg-surface)' },
+    REEMBOLSADO: { label: 'Reembolsado', color: 'var(--accent-dark)', bg: 'var(--info-light)' },
 }
 
 export function PagamentoCard({ appointment }: Props) {
@@ -82,7 +82,7 @@ export function PagamentoCard({ appointment }: Props) {
                     disabled={gerando}
                     style={{
                         padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                        background: 'var(--text)', color: 'white',
+                        background: 'var(--accent)', color: 'var(--on-accent)',
                         fontSize: 11, fontWeight: 600, border: 'none',
                         cursor: 'pointer', flexShrink: 0,
                         opacity: gerando ? 0.6 : 1,
@@ -97,7 +97,7 @@ export function PagamentoCard({ appointment }: Props) {
                     onClick={() => window.open(pagamento.checkoutUrl!, '_blank')}
                     style={{
                         padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                        background: '#009EE3', color: 'white',
+                        background: '#009EE3', color: '#fff',
                         fontSize: 11, fontWeight: 600, border: 'none',
                         cursor: 'pointer', flexShrink: 0,
                     }}

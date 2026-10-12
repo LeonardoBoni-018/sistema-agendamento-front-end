@@ -10,6 +10,7 @@ import {
 } from '@/types/horario'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { Plus, Trash2 } from 'lucide-react'
 
 export function ConfiguracaoPage() {
     const [horarios, setHorarios] = useState<HorarioFuncionamento[]>([])
@@ -195,7 +196,7 @@ export function ConfiguracaoPage() {
                                     >
                                         <div style={{
                                             width: 14, height: 14, borderRadius: '50%',
-                                            background: 'white', position: 'absolute',
+                                            background: 'var(--bg-card)', position: 'absolute',
                                             top: 3, left: aberto ? 19 : 3,
                                             transition: 'left 0.2s',
                                         }} />
@@ -271,11 +272,11 @@ export function ConfiguracaoPage() {
                         style={{
                             display: 'flex', alignItems: 'center', gap: 6,
                             padding: '7px 14px', borderRadius: 'var(--radius-sm)',
-                            background: 'var(--text)', color: 'white',
+                            background: 'var(--accent)', color: 'var(--on-accent)',
                             fontSize: 12, fontWeight: 600, border: 'none', cursor: 'pointer',
                         }}
                     >
-                        <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 13 }} />
+                        <Plus size={13} aria-hidden="true" />
                         Novo bloqueio
                     </button>
                 </div>
@@ -422,7 +423,7 @@ export function ConfiguracaoPage() {
                                 style={{
                                     padding: '7px 16px', borderRadius: 'var(--radius-sm)',
                                     fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                    background: 'var(--text)', color: 'white', border: 'none',
+                                    background: 'var(--accent)', color: 'var(--on-accent)', border: 'none',
                                 }}
                             >
                                 Salvar bloqueio
@@ -482,7 +483,7 @@ export function ConfiguracaoPage() {
                                     }}
                                     aria-label="Remover bloqueio"
                                 >
-                                    <i className="ti ti-trash" aria-hidden="true" />
+                                    <Trash2 size={15} aria-hidden="true" />
                                 </button>
                             </div>
                         ))}

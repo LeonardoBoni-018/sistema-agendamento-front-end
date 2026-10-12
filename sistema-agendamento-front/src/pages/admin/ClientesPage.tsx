@@ -5,6 +5,7 @@ import { Cliente } from '@/types/dashboard'
 import { StarRating } from '@/components/shared/StarRating'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { ChevronRight, X } from 'lucide-react'
 
 export function ClientesPage() {
     const [clientes, setClientes] = useState<Cliente[]>([])
@@ -74,7 +75,7 @@ export function ClientesPage() {
                                     color: 'var(--text-muted)', fontSize: 18,
                                 }}
                             >
-                                <i className="ti ti-x" aria-hidden="true" />
+                                <X size={15} aria-hidden="true" />
                             </button>
                         </div>
 
@@ -233,7 +234,7 @@ export function ClientesPage() {
                                     }}
                                     aria-label="Ver detalhes"
                                 >
-                                    <i className="ti ti-chevron-right" aria-hidden="true" />
+                                    <ChevronRight size={15} aria-hidden="true" />
                                 </button>
                             </div>
                         ))}

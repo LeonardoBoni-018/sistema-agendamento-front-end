@@ -84,14 +84,14 @@ export function AgendamentoPublicoPage() {
     }
 
     const inputStyle = {
-        background: '#F9FAFB', border: '1px solid #E5E7EB',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
         borderRadius: 8, padding: '10px 14px',
-        fontSize: 14, color: '#111827', width: '100%', outline: 'none',
+        fontSize: 14, color: 'var(--text)', width: '100%', outline: 'none',
         fontFamily: 'inherit',
     }
 
     const btnPrimary = {
-        background: '#1C1917', color: 'white',
+        background: 'var(--text)', color: 'var(--on-strong)',
         border: 'none', borderRadius: 8,
         padding: '11px 24px', fontSize: 14,
         fontWeight: 600, cursor: 'pointer',
@@ -100,10 +100,10 @@ export function AgendamentoPublicoPage() {
     if (loading) {
         return (
             <div style={{
-                minHeight: '100vh', background: '#F9FAFB',
+                minHeight: '100vh', background: 'var(--bg-surface)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-                <div style={{ fontSize: 14, color: '#6B7280' }}>Carregando...</div>
+                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>Carregando...</div>
             </div>
         )
     }
@@ -111,12 +111,12 @@ export function AgendamentoPublicoPage() {
     if (!comercio) {
         return (
             <div style={{
-                minHeight: '100vh', background: '#F9FAFB',
+                minHeight: '100vh', background: 'var(--bg-surface)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>😕</div>
-                    <div style={{ fontSize: 16, color: '#374151' }}>
+                    <div style={{ fontSize: 16, color: 'var(--text-secondary)' }}>
                         Comércio não encontrado
                     </div>
                 </div>
@@ -126,28 +126,28 @@ export function AgendamentoPublicoPage() {
 
     return (
         <div style={{
-            minHeight: '100vh', background: '#F9FAFB',
+            minHeight: '100vh', background: 'var(--bg-surface)',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}>
             {/* Header */}
             <div style={{
-                background: '#1C1917', padding: '20px 24px',
+                background: 'var(--text)', padding: '20px 24px',
                 display: 'flex', alignItems: 'center', gap: 14,
             }}>
                 <div style={{
                     width: 40, height: 40, borderRadius: 10,
-                    background: '#D97706', display: 'flex',
+                    background: 'var(--accent)', display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    fontSize: 18, fontWeight: 700, color: 'white', flexShrink: 0,
+                    fontSize: 18, fontWeight: 700, color: 'var(--on-strong)', flexShrink: 0,
                 }}>
                     {comercio.nome.charAt(0)}
                 </div>
                 <div>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: 'white' }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--on-strong)' }}>
                         {comercio.nome}
                     </div>
                     {comercio.endereco && (
-                        <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                             {comercio.endereco}
                         </div>
                     )}
@@ -158,21 +158,21 @@ export function AgendamentoPublicoPage() {
 
                 {step === 'confirmado' ? (
                     <div style={{
-                        background: 'white', borderRadius: 12,
-                        border: '1px solid #E5E7EB',
+                        background: 'var(--bg-card)', borderRadius: 12,
+                        border: '1px solid var(--border)',
                         padding: 32, textAlign: 'center',
                     }}>
                         <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
                         <div style={{
-                            fontSize: 20, fontWeight: 600, color: '#111827', marginBottom: 8,
+                            fontSize: 20, fontWeight: 600, color: 'var(--text)', marginBottom: 8,
                         }}>
                             Agendamento realizado!
                         </div>
-                        <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 20 }}>
+                        <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>
                             Você receberá uma confirmação por email em breve.
                         </div>
                         <div style={{
-                            background: '#F9FAFB', borderRadius: 8, padding: '16px 20px',
+                            background: 'var(--bg-surface)', borderRadius: 8, padding: '16px 20px',
                             textAlign: 'left', marginBottom: 20,
                         }}>
                             {[
@@ -185,10 +185,10 @@ export function AgendamentoPublicoPage() {
                             ].map(({ label, value }) => (
                                 <div key={label} style={{
                                     display: 'flex', justifyContent: 'space-between',
-                                    padding: '6px 0', borderBottom: '1px solid #E5E7EB',
+                                    padding: '6px 0', borderBottom: '1px solid var(--border)',
                                 }}>
-                                    <span style={{ fontSize: 13, color: '#6B7280' }}>{label}</span>
-                                    <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
+                                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</span>
+                                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
                     {value}
                   </span>
                                 </div>
@@ -217,7 +217,7 @@ export function AgendamentoPublicoPage() {
                                 <div key={s} style={{
                                     height: 4, flex: 1, borderRadius: 2,
                                     background: ['servico', 'profissional', 'data', 'dados']
-                                        .indexOf(step) >= i ? '#1C1917' : '#E5E7EB',
+                                        .indexOf(step) >= i ? 'var(--text)' : 'var(--border)',
                                     transition: 'background 0.2s',
                                 }} />
                             ))}
@@ -227,7 +227,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'servico' && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: '#9CA3AF',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
                                     textTransform: 'uppercase', letterSpacing: '0.06em',
                                     marginBottom: 12,
                                 }}>
@@ -244,9 +244,9 @@ export function AgendamentoPublicoPage() {
                                             }}
                                             style={{
                                                 background: selectedJob?.id === job.id
-                                                    ? '#F0FDF4' : 'white',
+                                                    ? 'var(--success-light)' : 'white',
                                                 border: `1px solid ${selectedJob?.id === job.id
-                                                    ? '#059669' : '#E5E7EB'}`,
+                                                    ? 'var(--success)' : 'var(--border)'}`,
                                                 borderRadius: 10, padding: '14px 16px',
                                                 textAlign: 'left', cursor: 'pointer',
                                                 display: 'flex', justifyContent: 'space-between',
@@ -255,13 +255,13 @@ export function AgendamentoPublicoPage() {
                                         >
                                             <div>
                                                 <div style={{
-                                                    fontSize: 14, fontWeight: 600, color: '#111827',
+                                                    fontSize: 14, fontWeight: 600, color: 'var(--text)',
                                                 }}>
                                                     {job.name}
                                                 </div>
                                                 {job.description && (
                                                     <div style={{
-                                                        fontSize: 12, color: '#6B7280', marginTop: 2,
+                                                        fontSize: 12, color: 'var(--text-muted)', marginTop: 2,
                                                     }}>
                                                         {job.description}
                                                     </div>
@@ -269,11 +269,11 @@ export function AgendamentoPublicoPage() {
                                             </div>
                                             <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 12 }}>
                                                 <div style={{
-                                                    fontSize: 14, fontWeight: 700, color: '#111827',
+                                                    fontSize: 14, fontWeight: 700, color: 'var(--text)',
                                                 }}>
                                                     R$ {Number(job.price).toFixed(2)}
                                                 </div>
-                                                <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                                                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                                                     {job.durationMinutes}min
                                                 </div>
                                             </div>
@@ -287,7 +287,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'profissional' && comercio.funcionarios.length > 0 && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: '#9CA3AF',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
                                     textTransform: 'uppercase', letterSpacing: '0.06em',
                                     marginBottom: 12,
                                 }}>
@@ -300,12 +300,12 @@ export function AgendamentoPublicoPage() {
                                             setStep('data')
                                         }}
                                         style={{
-                                            background: !selectedFuncionario ? '#F9FAFB' : 'white',
+                                            background: !selectedFuncionario ? 'var(--bg-surface)' : 'white',
                                             border: `1px solid ${!selectedFuncionario
-                                                ? '#1C1917' : '#E5E7EB'}`,
+                                                ? 'var(--text)' : 'var(--border)'}`,
                                             borderRadius: 10, padding: '12px 16px',
                                             textAlign: 'left', cursor: 'pointer',
-                                            fontSize: 13, color: '#374151', fontWeight: 500,
+                                            fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500,
                                         }}
                                     >
                                         Sem preferência
@@ -319,9 +319,9 @@ export function AgendamentoPublicoPage() {
                                             }}
                                             style={{
                                                 background: selectedFuncionario?.id === f.id
-                                                    ? '#F9FAFB' : 'white',
+                                                    ? 'var(--bg-surface)' : 'white',
                                                 border: `1px solid ${selectedFuncionario?.id === f.id
-                                                    ? '#1C1917' : '#E5E7EB'}`,
+                                                    ? 'var(--text)' : 'var(--border)'}`,
                                                 borderRadius: 10, padding: '12px 16px',
                                                 textAlign: 'left', cursor: 'pointer',
                                                 display: 'flex', alignItems: 'center', gap: 10,
@@ -329,22 +329,22 @@ export function AgendamentoPublicoPage() {
                                         >
                                             <div style={{
                                                 width: 36, height: 36, borderRadius: '50%',
-                                                background: '#FEF3C7',
+                                                background: 'var(--accent-light)',
                                                 display: 'flex', alignItems: 'center',
                                                 justifyContent: 'center',
-                                                fontSize: 14, fontWeight: 700, color: '#92400E',
+                                                fontSize: 14, fontWeight: 700, color: 'var(--accent-dark)',
                                                 flexShrink: 0,
                                             }}>
                                                 {f.nome.charAt(0)}
                                             </div>
                                             <div>
                                                 <div style={{
-                                                    fontSize: 13, fontWeight: 600, color: '#111827',
+                                                    fontSize: 13, fontWeight: 600, color: 'var(--text)',
                                                 }}>
                                                     {f.nome}
                                                 </div>
                                                 {f.especialidade && (
-                                                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                                                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                                                         {f.especialidade}
                                                     </div>
                                                 )}
@@ -356,7 +356,7 @@ export function AgendamentoPublicoPage() {
                                     onClick={() => setStep('servico')}
                                     style={{
                                         marginTop: 16, background: 'none', border: 'none',
-                                        cursor: 'pointer', fontSize: 13, color: '#6B7280',
+                                        cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)',
                                     }}
                                 >
                                     ← Voltar
@@ -368,7 +368,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'data' && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: '#9CA3AF',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
                                     textTransform: 'uppercase', letterSpacing: '0.06em',
                                     marginBottom: 12,
                                 }}>
@@ -377,7 +377,7 @@ export function AgendamentoPublicoPage() {
 
                                 <div style={{ marginBottom: 16 }}>
                                     <label style={{
-                                        fontSize: 12, fontWeight: 600, color: '#6B7280',
+                                        fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
                                         display: 'block', marginBottom: 6,
                                     }}>
                                         Data
@@ -394,17 +394,17 @@ export function AgendamentoPublicoPage() {
                                 {selectedDate && (
                                     <div>
                                         <label style={{
-                                            fontSize: 12, fontWeight: 600, color: '#6B7280',
+                                            fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
                                             display: 'block', marginBottom: 8,
                                         }}>
                                             Horários disponíveis
                                         </label>
                                         {loadingTimes ? (
-                                            <div style={{ fontSize: 13, color: '#9CA3AF' }}>
+                                            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                                                 Carregando horários...
                                             </div>
                                         ) : availableTimes.length === 0 ? (
-                                            <div style={{ fontSize: 13, color: '#9CA3AF' }}>
+                                            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                                                 Nenhum horário disponível nesta data
                                             </div>
                                         ) : (
@@ -418,10 +418,10 @@ export function AgendamentoPublicoPage() {
                                                             borderRadius: 8, fontSize: 13,
                                                             fontWeight: 500, cursor: 'pointer',
                                                             background: selectedTime === t
-                                                                ? '#1C1917' : 'white',
-                                                            color: selectedTime === t ? 'white' : '#374151',
+                                                                ? 'var(--text)' : 'white',
+                                                            color: selectedTime === t ? 'var(--on-strong)' : 'var(--text-secondary)',
                                                             border: `1px solid ${selectedTime === t
-                                                                ? '#1C1917' : '#E5E7EB'}`,
+                                                                ? 'var(--text)' : 'var(--border)'}`,
                                                             transition: 'all 0.12s',
                                                         }}
                                                     >
@@ -449,7 +449,7 @@ export function AgendamentoPublicoPage() {
                                     )}
                                     style={{
                                         marginTop: 12, background: 'none', border: 'none',
-                                        cursor: 'pointer', fontSize: 13, color: '#6B7280',
+                                        cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)',
                                         display: 'block',
                                     }}
                                 >
@@ -462,29 +462,29 @@ export function AgendamentoPublicoPage() {
                         {step === 'dados' && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: '#9CA3AF',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
                                     textTransform: 'uppercase', letterSpacing: '0.06em',
                                     marginBottom: 4,
                                 }}>
                                     Seus dados
                                 </div>
                                 <div style={{
-                                    fontSize: 12, color: '#9CA3AF', marginBottom: 16,
+                                    fontSize: 12, color: 'var(--text-muted)', marginBottom: 16,
                                 }}>
                                     Já tem conta? Use o mesmo email para vincular ao seu perfil.
                                 </div>
 
                                 {/* Resumo */}
                                 <div style={{
-                                    background: '#F9FAFB', borderRadius: 8, padding: 14,
+                                    background: 'var(--bg-surface)', borderRadius: 8, padding: 14,
                                     marginBottom: 20, fontSize: 13,
                                 }}>
                                     <div style={{
-                                        fontWeight: 600, color: '#111827', marginBottom: 6,
+                                        fontWeight: 600, color: 'var(--text)', marginBottom: 6,
                                     }}>
                                         {selectedJob?.name}
                                     </div>
-                                    <div style={{ color: '#6B7280' }}>
+                                    <div style={{ color: 'var(--text-muted)' }}>
                                         {selectedDate} às {selectedTime?.slice(0, 5)}
                                         {selectedFuncionario && ` · ${selectedFuncionario.nome}`}
                                     </div>
@@ -502,7 +502,7 @@ export function AgendamentoPublicoPage() {
                                     ].map(({ name, label, type, placeholder }) => (
                                         <div key={name}>
                                             <label style={{
-                                                fontSize: 11, fontWeight: 600, color: '#6B7280',
+                                                fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
                                                 textTransform: 'uppercase', letterSpacing: '0.06em',
                                                 display: 'block', marginBottom: 6,
                                             }}>
@@ -516,7 +516,7 @@ export function AgendamentoPublicoPage() {
                                             />
                                             {errors[name] && (
                                                 <span style={{
-                                                    fontSize: 11, color: '#DC2626', marginTop: 3,
+                                                    fontSize: 11, color: 'var(--danger)', marginTop: 3,
                                                     display: 'block',
                                                 }}>
                           {errors[name]?.message}
@@ -541,7 +541,7 @@ export function AgendamentoPublicoPage() {
                                     onClick={() => setStep('data')}
                                     style={{
                                         marginTop: 12, background: 'none', border: 'none',
-                                        cursor: 'pointer', fontSize: 13, color: '#6B7280',
+                                        cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)',
                                     }}
                                 >
                                     ← Voltar

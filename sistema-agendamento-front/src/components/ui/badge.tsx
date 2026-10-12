@@ -1,12 +1,18 @@
 export type BadgeVariant = 'default' | 'success' | 'danger' | 'warning' | 'info' | 'muted'
 
+const tone = (c: string) => ({
+    bg: `var(--${c}-light)`,
+    color: `var(--${c})`,
+    border: `color-mix(in srgb, var(--${c}) 28%, transparent)`,
+})
+
 const configs: Record<BadgeVariant, { bg: string; color: string; border: string }> = {
     default: { bg: 'var(--bg-surface)', color: 'var(--text-secondary)', border: 'var(--border)' },
-    success: { bg: 'var(--success-light)', color: '#065F46', border: '#A7F3D0' },
-    danger: { bg: 'var(--danger-light)', color: '#991B1B', border: '#FECACA' },
-    warning: { bg: 'var(--warning-light)', color: '#92400E', border: '#FDE68A' },
-    info: { bg: 'var(--info-light)', color: '#1E40AF', border: '#BFDBFE' },
-    muted: { bg: '#F4F4F5', color: 'var(--text-muted)', border: '#E4E4E7' },
+    success: tone('success'),
+    danger: tone('danger'),
+    warning: tone('warning'),
+    info: tone('info'),
+    muted: { bg: 'var(--bg-surface)', color: 'var(--text-muted)', border: 'var(--border)' },
 }
 
 interface BadgeProps {
@@ -21,8 +27,8 @@ export function Badge({ variant = 'default', children, dot, style }: BadgeProps)
     return (
         <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: 11, fontWeight: 600, letterSpacing: '0.02em',
-            padding: '3px 8px', borderRadius: 100,
+            fontSize: 10.5, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
+            padding: '3px 8px', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-mono)',
             background: bg, color, border: `1px solid ${border}`,
             whiteSpace: 'nowrap', ...style,
         }}>

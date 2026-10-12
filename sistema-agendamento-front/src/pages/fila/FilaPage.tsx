@@ -11,6 +11,7 @@ import { Funcionario } from '@/types/funcionario'
 import { useAuthStore } from '@/store/authStore'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { Plus } from 'lucide-react'
 
 export function FilaPage() {
     const navigate = useNavigate()
@@ -96,13 +97,13 @@ export function FilaPage() {
     return (
         <div style={{ maxWidth: 600 }}>
             <div style={{
-                background: '#FFFBEB', border: '1px solid #FDE68A',
+                background: 'var(--accent-light)', border: '1px solid var(--accent-light)',
                 borderRadius: 'var(--radius)', padding: '16px 20px', marginBottom: 20,
             }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#92400E', marginBottom: 4 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--accent-dark)', marginBottom: 4 }}>
                     ⏳ Como funciona a fila de espera
                 </div>
-                <div style={{ fontSize: 13, color: '#B45309', lineHeight: 1.5 }}>
+                <div style={{ fontSize: 13, color: 'var(--accent-dark)', lineHeight: 1.5 }}>
                     Quando todos os horários de uma data estão ocupados, entre na fila.
                     Assim que alguém cancelar, você será notificado por email e pelo sistema.
                 </div>
@@ -122,11 +123,11 @@ export function FilaPage() {
                     style={{
                         display: 'flex', alignItems: 'center', gap: 6,
                         padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                        background: '#F59E0B', color: 'white',
+                        background: 'var(--accent)', color: 'var(--on-strong)',
                         fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                     }}
                 >
-                    <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                    <Plus size={14} aria-hidden="true" />
                     Entrar na fila
                 </button>
             </div>
@@ -229,7 +230,7 @@ export function FilaPage() {
                                     flex: 1, padding: '9px',
                                     borderRadius: 'var(--radius-sm)',
                                     fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                    background: '#F59E0B', color: 'white', border: 'none',
+                                    background: 'var(--accent)', color: 'var(--on-strong)', border: 'none',
                                     opacity: submitting ? 0.6 : 1,
                                 }}
                             >
@@ -263,7 +264,7 @@ export function FilaPage() {
                         style={{
                             marginTop: 12, padding: '8px 20px',
                             borderRadius: 'var(--radius-sm)',
-                            background: 'var(--text)', color: 'white',
+                            background: 'var(--accent)', color: 'var(--on-accent)',
                             fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                         }}
                     >
@@ -280,9 +281,9 @@ export function FilaPage() {
                         }}>
                             <div style={{
                                 width: 36, height: 36, borderRadius: '50%',
-                                background: '#FEF3C7', display: 'flex',
+                                background: 'var(--accent-light)', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
-                                fontSize: 14, fontWeight: 700, color: '#92400E', flexShrink: 0,
+                                fontSize: 14, fontWeight: 700, color: 'var(--accent-dark)', flexShrink: 0,
                             }}>
                                 {f.posicao}º
                             </div>

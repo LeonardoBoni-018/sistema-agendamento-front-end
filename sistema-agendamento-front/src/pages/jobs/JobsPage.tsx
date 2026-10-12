@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { sseService } from '@/services/sseService'
+import { Pencil, Plus, Trash2, X } from 'lucide-react'
 
 const schema = z.object({
     name: z.string().min(1, 'Nome obrigatório'),
@@ -128,10 +129,10 @@ export function JobsPage() {
                 <button onClick={openCreate} style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                    background: 'var(--text)', color: 'white',
+                    background: 'var(--accent)', color: 'var(--on-accent)',
                     fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                 }}>
-                    <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                    <Plus size={14} aria-hidden="true" />
                     Novo serviço
                 </button>
             </div>
@@ -152,7 +153,7 @@ export function JobsPage() {
                             background: 'none', border: 'none', cursor: 'pointer',
                             color: 'var(--text-muted)', fontSize: 16,
                         }}>
-                            <i className="ti ti-x" aria-hidden="true" />
+                            <X size={15} aria-hidden="true" />
                         </button>
                     </div>
                     <form onSubmit={handleSubmit(onSubmit)}>
@@ -196,7 +197,7 @@ export function JobsPage() {
                             <button type="submit" disabled={isSubmitting} style={{
                                 padding: '8px 18px', borderRadius: 'var(--radius-sm)',
                                 fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                background: 'var(--text)', color: 'white',
+                                background: 'var(--accent)', color: 'var(--on-accent)',
                                 border: 'none', opacity: isSubmitting ? 0.6 : 1,
                             }}>
                                 {isSubmitting ? 'Salvando...' : 'Salvar'}
@@ -230,7 +231,7 @@ export function JobsPage() {
                         </div>
                         <button onClick={openCreate} style={{
                             padding: '9px 20px', borderRadius: 'var(--radius-sm)',
-                            background: 'var(--text)', color: 'white',
+                            background: 'var(--accent)', color: 'var(--on-accent)',
                             fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                         }}>
                             Criar primeiro serviço
@@ -280,13 +281,13 @@ export function JobsPage() {
                                         background: 'none', border: 'none', cursor: 'pointer',
                                         color: 'var(--text-muted)', fontSize: 15, padding: 2,
                                     }}>
-                                        <i className="ti ti-edit" aria-hidden="true" />
+                                        <Pencil size={15} aria-hidden="true" />
                                     </button>
                                     <button onClick={() => handleDelete(job.id)} style={{
                                         background: 'none', border: 'none', cursor: 'pointer',
                                         color: 'var(--danger)', fontSize: 15, padding: 2,
                                     }}>
-                                        <i className="ti ti-trash" aria-hidden="true" />
+                                        <Trash2 size={15} aria-hidden="true" />
                                     </button>
                                 </div>
                             </div>

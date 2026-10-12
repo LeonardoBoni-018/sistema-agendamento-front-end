@@ -5,6 +5,7 @@ import { Funcionario, FuncionarioRequest } from '@/types/funcionario'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Copy, Pencil, Plus, X } from 'lucide-react'
 
 const schema = z.object({
     nome: z.string().min(2, 'Nome obrigatório'),
@@ -99,10 +100,10 @@ export function FuncionariosPage() {
                 <button onClick={openCreate} style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                    background: 'var(--text)', color: 'white',
+                    background: 'var(--accent)', color: 'var(--on-accent)',
                     fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                 }}>
-                    <i className="ti ti-plus" aria-hidden="true" style={{ fontSize: 14 }} />
+                    <Plus size={14} aria-hidden="true" />
                     Novo profissional
                 </button>
             </div>
@@ -123,7 +124,7 @@ export function FuncionariosPage() {
                             background: 'none', border: 'none', cursor: 'pointer',
                             color: 'var(--text-muted)', fontSize: 18,
                         }}>
-                            <i className="ti ti-x" aria-hidden="true" />
+                            <X size={15} aria-hidden="true" />
                         </button>
                     </div>
                     <form onSubmit={handleSubmit(onSubmit)}>
@@ -179,7 +180,7 @@ export function FuncionariosPage() {
                                 style={{
                                     padding: '8px 18px', borderRadius: 'var(--radius-sm)',
                                     fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                                    background: 'var(--text)', color: 'white', border: 'none',
+                                    background: 'var(--accent)', color: 'var(--on-accent)', border: 'none',
                                     opacity: isSubmitting ? 0.6 : 1,
                                 }}
                             >
@@ -211,7 +212,7 @@ export function FuncionariosPage() {
                         </div>
                         <button onClick={openCreate} style={{
                             padding: '9px 20px', borderRadius: 'var(--radius-sm)',
-                            background: 'var(--text)', color: 'white',
+                            background: 'var(--accent)', color: 'var(--on-accent)',
                             fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
                         }}>
                             Adicionar profissional
@@ -265,7 +266,7 @@ export function FuncionariosPage() {
                                     }}
                                     aria-label="Editar"
                                 >
-                                    <i className="ti ti-edit" aria-hidden="true" />
+                                    <Pencil size={15} aria-hidden="true" />
                                 </button>
                                 <button
                                     onClick={() => handleToggle(f.id)}
@@ -324,7 +325,7 @@ export function FuncionariosPage() {
                             flexShrink: 0,
                         }}
                     >
-                        <i className="ti ti-copy" aria-hidden="true" />
+                        <Copy size={15} aria-hidden="true" />
                     </button>
                 </div>
             </div>

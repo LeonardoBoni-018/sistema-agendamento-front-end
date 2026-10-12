@@ -37,9 +37,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         const variants: Record<string, React.CSSProperties> = {
             primary: {
-                background: 'var(--text)',
-                color: '#fff',
-                boxShadow: 'var(--shadow-sm)',
+                background: 'var(--accent)',
+                color: 'var(--on-accent)',
+                boxShadow: '0 0 0 1px var(--accent), 0 4px 18px -6px var(--accent)',
             },
             secondary: {
                 background: 'var(--bg-surface)',
@@ -53,12 +53,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             danger: {
                 background: 'var(--danger-light)',
                 color: 'var(--danger)',
-                border: '1px solid #FECACA',
+                border: '1px solid var(--danger-light)',
             },
             warning: {
                 background: 'var(--accent-light)',
                 color: 'var(--accent-dark)',
-                border: '1px solid #FDE68A',
+                border: '1px solid var(--accent-light)',
             },
         }
 
@@ -76,7 +76,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 onMouseEnter={e => {
                     if (disabled || loading) return
                     const el = e.currentTarget
-                    if (variant === 'primary') el.style.opacity = '0.88'
+                    if (variant === 'primary') el.style.background = 'var(--accent-hover)'
                     else if (variant === 'ghost') el.style.background = 'var(--bg-surface)'
                     else if (variant === 'secondary') el.style.borderColor = 'var(--border-strong)'
                 }}
@@ -84,6 +84,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     if (disabled || loading) return
                     const el = e.currentTarget
                     el.style.opacity = '1'
+                    if (variant === 'primary') el.style.background = 'var(--accent)'
                     if (variant === 'ghost') el.style.background = 'transparent'
                     if (variant === 'secondary') el.style.borderColor = 'var(--border)'
                 }}

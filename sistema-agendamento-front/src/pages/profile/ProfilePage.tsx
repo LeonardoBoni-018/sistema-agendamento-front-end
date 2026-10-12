@@ -106,7 +106,7 @@ export function ProfilePage() {
                         <button type="submit" disabled={isSubmitting} style={{
                             width: '100%', padding: '10px',
                             borderRadius: 'var(--radius-sm)', background: 'var(--text)',
-                            color: 'white', fontSize: 14, fontWeight: 600,
+                            color: 'var(--on-strong)', fontSize: 14, fontWeight: 600,
                             border: 'none', cursor: 'pointer',
                             opacity: isSubmitting ? 0.6 : 1,
                         }}>

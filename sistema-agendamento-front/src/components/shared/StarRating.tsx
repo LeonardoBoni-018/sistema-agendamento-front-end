@@ -28,7 +28,7 @@ export function StarRating({
                         cursor: readonly ? 'default' : 'pointer',
                         padding: 0, lineHeight: 1,
                         fontSize: size,
-                        color: star <= active ? '#F59E0B' : 'var(--border)',
+                        color: star <= active ? 'var(--accent)' : 'var(--border)',
                         transition: 'color 0.1s',
                     }}
                     aria-label={`${star} estrela${star > 1 ? 's' : ''}`}

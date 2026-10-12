@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { sseService, SsePayload } from '@/services/sseService'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { Bell, CalendarCheck, CalendarPlus, CalendarX } from 'lucide-react'
 
 interface Notification {
     id: string
@@ -52,15 +53,15 @@ export function NotificationBell() {
     }
 
     const iconColor = (type: string) => {
-        if (type === 'APPOINTMENT_CREATED') return '#059669'
-        if (type === 'APPOINTMENT_CANCELED') return '#DC2626'
-        return '#D97706'
+        if (type === 'APPOINTMENT_CREATED') return 'var(--success)'
+        if (type === 'APPOINTMENT_CANCELED') return 'var(--danger)'
+        return 'var(--accent)'
     }
 
-    const iconName = (type: string) => {
-        if (type === 'APPOINTMENT_CREATED') return 'ti-calendar-plus'
-        if (type === 'APPOINTMENT_CANCELED') return 'ti-calendar-x'
-        return 'ti-calendar-check'
+    const iconFor = (type: string) => {
+        if (type === 'APPOINTMENT_CREATED') return CalendarPlus
+        if (type === 'APPOINTMENT_CANCELED') return CalendarX
+        return CalendarCheck
     }
 
     return (
@@ -75,12 +76,12 @@ export function NotificationBell() {
                 }}
                 aria-label="Notificações"
             >
-                <i className="ti ti-bell" aria-hidden="true" style={{ fontSize: 16 }} />
+                <Bell size={16} aria-hidden="true" />
                 {unread > 0 && (
                     <span style={{
                         position: 'absolute', top: -4, right: -4,
                         width: 16, height: 16, borderRadius: '50%',
-                        background: 'var(--danger)', color: 'white',
+                        background: 'var(--danger)', color: 'var(--on-strong)',
                         fontSize: 10, fontWeight: 700,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
@@ -138,15 +139,14 @@ export function NotificationBell() {
                                     }}>
                                         <div style={{
                                             width: 28, height: 28, borderRadius: '50%',
-                                            background: `${iconColor(n.type)}18`,
+                                            background: `color-mix(in srgb, ${iconColor(n.type)} 15%, transparent)`,
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             flexShrink: 0,
                                         }}>
-                                            <i
-                                                className={`ti ${iconName(n.type)}`}
-                                                aria-hidden="true"
-                                                style={{ fontSize: 14, color: iconColor(n.type) }}
-                                            />
+                                            {(() => {
+                                                const NIcon = iconFor(n.type)
+                                                return <NIcon size={14} aria-hidden="true" style={{ color: iconColor(n.type) }} />
+                                            })()}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>

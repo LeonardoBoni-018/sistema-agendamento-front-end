@@ -30,12 +30,12 @@ export function FilaEsperaCard({ filas, onSair }: Props) {
 
     return (
         <div style={{
-            background: '#FFFBEB', border: '1px solid #FDE68A',
+            background: 'var(--accent-light)', border: '1px solid var(--accent-light)',
             borderRadius: 'var(--radius)', padding: '14px 16px',
             marginBottom: 16,
         }}>
             <div style={{
-                fontSize: 12, fontWeight: 700, color: '#92400E',
+                fontSize: 12, fontWeight: 700, color: 'var(--accent-dark)',
                 textTransform: 'uppercase', letterSpacing: '0.06em',
                 marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6,
             }}>
@@ -45,21 +45,21 @@ export function FilaEsperaCard({ filas, onSair }: Props) {
                 <div key={f.id} style={{
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '8px 0',
-                    borderBottom: '1px solid #FDE68A',
+                    borderBottom: '1px solid var(--accent-light)',
                 }}>
                     <div style={{
                         width: 28, height: 28, borderRadius: '50%',
-                        background: '#FEF3C7', display: 'flex',
+                        background: 'var(--accent-light)', display: 'flex',
                         alignItems: 'center', justifyContent: 'center',
-                        fontSize: 12, fontWeight: 700, color: '#92400E', flexShrink: 0,
+                        fontSize: 12, fontWeight: 700, color: 'var(--accent-dark)', flexShrink: 0,
                     }}>
                         {f.posicao}º
                     </div>
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#92400E' }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-dark)' }}>
                             {f.jobName}
                         </div>
-                        <div style={{ fontSize: 11, color: '#B45309' }}>
+                        <div style={{ fontSize: 11, color: 'var(--accent-dark)' }}>
                             {format(parseISO(f.date), "dd 'de' MMM", { locale: ptBR })}
                             {f.horarioPreferido && ` · pref. ${f.horarioPreferido.slice(0, 5)}`}
                         </div>
@@ -68,7 +68,7 @@ export function FilaEsperaCard({ filas, onSair }: Props) {
                         onClick={() => handleSair(f.id)}
                         disabled={loading === f.id}
                         style={{
-                            fontSize: 11, fontWeight: 600, color: '#92400E',
+                            fontSize: 11, fontWeight: 600, color: 'var(--accent-dark)',
                             background: 'none', border: 'none', cursor: 'pointer',
                             opacity: loading === f.id ? 0.5 : 1,
                         }}
