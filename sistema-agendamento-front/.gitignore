@@ -31,3 +31,9 @@ dist-ssr
 # IDE
 .idea/*
 .vscode/*
+
+# Local artifacts
+*.tsbuildinfo
+stdout.txt
+stderr.txt
+.vercel

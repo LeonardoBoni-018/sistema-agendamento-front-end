@@ -117,3 +117,10 @@ Este projeto está licenciado sob a licença MIT — veja o arquivo [LICENSE](LI
 <div align="center">
   <sub>Desenvolvido com ❤️</sub>
 </div>
+
+## Deploy na Vercel
+
+1. Importe o repositório na Vercel e defina o **Root Directory** como `sistema-agendamento-front`.
+2. Framework: Vite (detectado automaticamente; `vercel.json` já configura rewrite de SPA, cache e headers de segurança).
+3. Variável de ambiente: `VITE_API_URL` = URL pública da API no Render (ex.: `https://sistema-agendamento-api.onrender.com`).
+4. Depois do deploy, copie a URL da Vercel para `CORS_ALLOWED_ORIGINS` e `APP_URL` no Render.

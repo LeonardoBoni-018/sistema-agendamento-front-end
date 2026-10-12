@@ -1,9 +1,10 @@
 import axios from 'axios'
+import { API_URL } from '@/config'
 import { ComercioPublico } from '@/types/publico'
 import { AgendamentoPublicoRequest } from '@/types/publico'
 
 const publicApi = axios.create({
-    baseURL: 'http://localhost:8080',
+    baseURL: API_URL,
     headers: { 'Content-Type': 'application/json' },
 })
 

@@ -1,26 +1,37 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PrivateRoute } from './PrivateRoute'
 import { AdminRoute } from './AdminRoute'
 import { DashboardLayout } from 'src/components/layout/DashboardLayout'
-import { LoginPage } from '@/pages/auth/LoginPage'
-import { AgendamentoPublicoPage } from '@/pages/publico/AgendamentoPublicoPage'
-import { PagamentoRetornoPage } from '@/pages/pagamento/PagamentoRetornoPage'
-import { DashboardPage } from '@/pages/dashboard/DashboardPage'
-import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage'
-import { NewAppointmentPage } from '@/pages/appointments/NewAppointmentPage'
-import { FilaPage } from '@/pages/fila/FilaPage'
-import { JobsPage } from '@/pages/jobs/JobsPage'
-import { AdminAppointmentsPage } from '@/pages/admin/AdminAppointmentsPage'
-import { FilaAdminPage } from '@/pages/admin/FilaAdminPage'
-import { ClientesPage } from '@/pages/admin/ClientesPage'
-import { AvaliacoesPage } from '@/pages/admin/AvaliacoesPage'
-import { ConfiguracaoPage } from '@/pages/admin/ConfiguracaoPage'
-import { FuncionariosPage } from '@/pages/admin/FuncionariosPage'
-import { ProfilePage } from '@/pages/profile/ProfilePage'
+
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage })))
+const AgendamentoPublicoPage = lazy(() => import('@/pages/publico/AgendamentoPublicoPage').then(m => ({ default: m.AgendamentoPublicoPage })))
+const PagamentoRetornoPage = lazy(() => import('@/pages/pagamento/PagamentoRetornoPage').then(m => ({ default: m.PagamentoRetornoPage })))
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
+const AppointmentsPage = lazy(() => import('@/pages/appointments/AppointmentsPage').then(m => ({ default: m.AppointmentsPage })))
+const NewAppointmentPage = lazy(() => import('@/pages/appointments/NewAppointmentPage').then(m => ({ default: m.NewAppointmentPage })))
+const FilaPage = lazy(() => import('@/pages/fila/FilaPage').then(m => ({ default: m.FilaPage })))
+const JobsPage = lazy(() => import('@/pages/jobs/JobsPage').then(m => ({ default: m.JobsPage })))
+const AdminAppointmentsPage = lazy(() => import('@/pages/admin/AdminAppointmentsPage').then(m => ({ default: m.AdminAppointmentsPage })))
+const FilaAdminPage = lazy(() => import('@/pages/admin/FilaAdminPage').then(m => ({ default: m.FilaAdminPage })))
+const ClientesPage = lazy(() => import('@/pages/admin/ClientesPage').then(m => ({ default: m.ClientesPage })))
+const AvaliacoesPage = lazy(() => import('@/pages/admin/AvaliacoesPage').then(m => ({ default: m.AvaliacoesPage })))
+const ConfiguracaoPage = lazy(() => import('@/pages/admin/ConfiguracaoPage').then(m => ({ default: m.ConfiguracaoPage })))
+const FuncionariosPage = lazy(() => import('@/pages/admin/FuncionariosPage').then(m => ({ default: m.FuncionariosPage })))
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage').then(m => ({ default: m.ProfilePage })))
+
+function Fallback() {
+    return (
+        <div style={{ minHeight: '40vh', display: 'grid', placeItems: 'center' }}>
+            <span style={{ width: 22, height: 22, border: '2px solid var(--border-strong)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        </div>
+    )
+}
 
 export function AppRoutes() {
     return (
         <BrowserRouter>
+            <Suspense fallback={<Fallback />}>
             <Routes>
                 {/* Públicas */}
                 <Route path="/login" element={<LoginPage />} />
@@ -52,6 +63,7 @@ export function AppRoutes() {
 
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
+            </Suspense>
         </BrowserRouter>
     )
 }

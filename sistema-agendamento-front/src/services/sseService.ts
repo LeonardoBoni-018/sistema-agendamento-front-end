@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/authStore'
+import { API_URL } from '@/config'
 
 export type SseEventType =
     | 'APPOINTMENT_CREATED'
@@ -38,11 +39,11 @@ class SseService {
         const token = useAuthStore.getState().token
         if (!token) return
 
-        const url = `http://localhost:8080/v1/events/stream?token=${token}`
+        const url = `${API_URL}/v1/events/stream?token=${encodeURIComponent(token)}`
         this.es = new EventSource(url)
 
         this.es.onopen = () => {
-            console.log('[SSE] Conectado')
+            void 0
             this.reconnectDelay = 2000
         }
 
