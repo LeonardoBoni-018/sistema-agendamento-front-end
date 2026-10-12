@@ -19,7 +19,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             gap: 6,
             fontFamily: 'var(--font)',
             fontWeight: 600,
-            letterSpacing: '-0.01em',
             border: 'none',
             cursor: disabled || loading ? 'not-allowed' : 'pointer',
             transition: 'all var(--transition)',
@@ -30,21 +29,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }
 
         const sizes = {
-            sm: { fontSize: 12, padding: '5px 10px', borderRadius: 'var(--radius-xs)' },
-            md: { fontSize: 13, padding: '8px 14px', borderRadius: 'var(--radius-sm)' },
-            lg: { fontSize: 14, padding: '11px 20px', borderRadius: 'var(--radius)' },
+            sm: { fontSize: 13, padding: '6px 11px', borderRadius: 'var(--radius-sm)' },
+            md: { fontSize: 14, padding: '8px 15px', borderRadius: 'var(--radius-sm)' },
+            lg: { fontSize: 15, padding: '11px 20px', borderRadius: 'var(--radius-sm)' },
         }
 
         const variants: Record<string, React.CSSProperties> = {
             primary: {
                 background: 'var(--accent)',
                 color: 'var(--on-accent)',
-                boxShadow: '0 0 0 1px var(--accent), 0 4px 18px -6px var(--accent)',
+                
             },
             secondary: {
                 background: 'var(--bg-surface)',
                 color: 'var(--text)',
-                border: '1px solid var(--border)',
+                border: '1px solid var(--border-strong)',
             },
             ghost: {
                 background: 'transparent',
@@ -78,7 +77,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     const el = e.currentTarget
                     if (variant === 'primary') el.style.background = 'var(--accent-hover)'
                     else if (variant === 'ghost') el.style.background = 'var(--bg-surface)'
-                    else if (variant === 'secondary') el.style.borderColor = 'var(--border-strong)'
+                    else if (variant === 'secondary') el.style.borderColor = 'var(--text-muted)'
                 }}
                 onMouseLeave={e => {
                     if (disabled || loading) return
@@ -86,14 +85,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                     el.style.opacity = '1'
                     if (variant === 'primary') el.style.background = 'var(--accent)'
                     if (variant === 'ghost') el.style.background = 'transparent'
-                    if (variant === 'secondary') el.style.borderColor = 'var(--border)'
-                }}
-                onMouseDown={e => {
-                    if (disabled || loading) return
-                    e.currentTarget.style.transform = 'scale(0.98)'
-                }}
-                onMouseUp={e => {
-                    e.currentTarget.style.transform = 'scale(1)'
+                    if (variant === 'secondary') el.style.borderColor = 'var(--border-strong)'
                 }}
                 {...props}
             >

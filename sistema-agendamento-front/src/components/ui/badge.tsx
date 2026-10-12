@@ -27,8 +27,8 @@ export function Badge({ variant = 'default', children, dot, style }: BadgeProps)
     return (
         <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: 10.5, fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase',
-            padding: '3px 8px', borderRadius: 'var(--radius-xs)', fontFamily: 'var(--font-mono)',
+            fontSize: 12, fontWeight: 500, 
+            padding: '2px 8px', borderRadius: 'var(--radius-xs)',
             background: bg, color, border: `1px solid ${border}`,
             whiteSpace: 'nowrap', ...style,
         }}>

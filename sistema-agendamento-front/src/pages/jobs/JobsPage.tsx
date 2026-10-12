@@ -162,22 +162,22 @@ export function JobsPage() {
                             gap: 12, padding: '20px',
                         }}>
                             <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nome</label>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>Nome</label>
                                 <input {...register('name')} placeholder="Ex: Corte masculino" style={inputStyle} />
                                 {errors.name && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.name.message}</span>}
                             </div>
                             <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Descrição</label>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>Descrição</label>
                                 <input {...register('description')} placeholder="Descreva o serviço" style={inputStyle} />
                                 {errors.description && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.description.message}</span>}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Preço (R$)</label>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>Preço (R$)</label>
                                 <input {...register('price')} type="number" step="0.01" placeholder="0,00" style={inputStyle} />
                                 {errors.price && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.price.message}</span>}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Duração (min)</label>
+                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>Duração (min)</label>
                                 <input {...register('durationMinutes')} type="number" placeholder="30" style={inputStyle} />
                                 {errors.durationMinutes && <span style={{ fontSize: 11, color: 'var(--danger)' }}>{errors.durationMinutes.message}</span>}
                             </div>
@@ -243,7 +243,7 @@ export function JobsPage() {
                             display: 'grid', gridTemplateColumns: '2fr 3fr 90px 80px 80px',
                             padding: '10px 20px', borderBottom: '1px solid var(--border)',
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase',
+                            letterSpacing: '0.06em',
                         }}>
                             <span>Nome</span>
                             <span>Descrição</span>

@@ -227,8 +227,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'servico' && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em',
                                     marginBottom: 12,
                                 }}>
                                     Escolha o serviço
@@ -287,8 +286,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'profissional' && comercio.funcionarios.length > 0 && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em',
                                     marginBottom: 12,
                                 }}>
                                     Escolha o profissional (opcional)
@@ -368,8 +366,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'data' && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em',
                                     marginBottom: 12,
                                 }}>
                                     Escolha data e horário
@@ -462,8 +459,7 @@ export function AgendamentoPublicoPage() {
                         {step === 'dados' && (
                             <div>
                                 <div style={{
-                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em',
                                     marginBottom: 4,
                                 }}>
                                     Seus dados
@@ -502,8 +498,7 @@ export function AgendamentoPublicoPage() {
                                     ].map(({ name, label, type, placeholder }) => (
                                         <div key={name}>
                                             <label style={{
-                                                fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                                                textTransform: 'uppercase', letterSpacing: '0.06em',
+                                                fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.06em',
                                                 display: 'block', marginBottom: 6,
                                             }}>
                                                 {label}

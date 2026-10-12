@@ -35,8 +35,7 @@ export function FilaEsperaCard({ filas, onSair }: Props) {
             marginBottom: 16,
         }}>
             <div style={{
-                fontSize: 12, fontWeight: 700, color: 'var(--accent-dark)',
-                textTransform: 'uppercase', letterSpacing: '0.06em',
+                fontSize: 12, fontWeight: 700, color: 'var(--accent-dark)', letterSpacing: '0.06em',
                 marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6,
             }}>
                 ⏳ Fila de espera ({filas.length})

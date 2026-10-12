@@ -6,7 +6,7 @@ import './index.css'
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <ThemeProvider attribute="data-theme" defaultTheme="dark" themes={['dark', 'light']} disableTransitionOnChange>
+        <ThemeProvider attribute="data-theme" defaultTheme="light" themes={['dark', 'light']} disableTransitionOnChange>
             <App />
         </ThemeProvider>
     </StrictMode>,

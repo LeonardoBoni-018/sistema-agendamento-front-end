@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CalendarCheck } from 'lucide-react'
 import api from '@/services/api'
 import { userService } from '@/services/userService'
 import { useAuthStore } from '@/store/authStore'
@@ -50,16 +49,8 @@ export function SetupPage() {
     return (
         <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24 }}>
             <div style={{ width: '100%', maxWidth: 400, animation: 'fadeInScale 0.3s ease both' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-                    <div style={{
-                        width: 34, height: 34, borderRadius: 9, background: 'var(--accent)',
-                        color: 'var(--on-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                        <CalendarCheck size={17} strokeWidth={2.25} />
-                    </div>
-                    <span style={{ fontWeight: 650, letterSpacing: '-0.02em' }}>Agenda</span>
-                </div>
-                <h1 style={{ fontSize: 24, fontWeight: 650, letterSpacing: '-0.03em', marginBottom: 4 }}>
+                <div className="serif" style={{ fontSize: 28, marginBottom: 28 }}>Agenda</div>
+                <h1 className="serif" style={{ fontSize: 34, marginBottom: 6 }}>
                     Configuração inicial
                 </h1>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>

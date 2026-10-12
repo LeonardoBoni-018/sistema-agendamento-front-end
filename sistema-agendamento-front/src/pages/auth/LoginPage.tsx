@@ -9,7 +9,6 @@ import { comercioService } from '@/services/comercioService'
 import { useAuthStore } from '@/store/authStore'
 import { userService } from '@/services/userService'
 import { Comercio } from '@/types/comercio'
-import { CalendarCheck } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -92,74 +91,46 @@ export function LoginPage() {
             minHeight: '100vh', display: 'flex',
             background: 'var(--bg)', fontFamily: 'var(--font)',
         }}>
-            {/* Painel de marca */}
+            {/* Painel: uma página de agenda */}
             <div className="login-brand" style={{
-                flex: 1, flexDirection: 'column',
-                justifyContent: 'space-between', padding: 48,
-                background: 'var(--bg-card)', borderRight: '1px solid var(--border)',
-                position: 'relative', overflow: 'hidden',
+                flex: 1, flexDirection: 'column', justifyContent: 'space-between',
+                padding: '40px 56px', background: 'var(--bg-surface)',
+                borderRight: '1px solid var(--border)',
             }}>
-                <div style={{
-                    position: 'absolute', inset: 0, opacity: 0.9,
-                    background: 'radial-gradient(40rem 26rem at 20% 0%, var(--glow), transparent 70%)',
-                }} />
+                <div className="serif" style={{ fontSize: 28 }}>Agenda</div>
 
-                <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 56 }}>
-                        <div style={{
-                            width: 34, height: 34, borderRadius: 9,
-                            background: 'var(--accent)', color: 'var(--on-accent)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 0 24px -4px var(--accent)',
-                        }}>
-                            <CalendarCheck size={17} strokeWidth={2.25} />
-                        </div>
-                        <span style={{ fontSize: 15, fontWeight: 650, letterSpacing: '-0.02em' }}>
-                            Agenda
-                        </span>
-                    </div>
-
-                    <h1 style={{
-                        fontSize: 'clamp(30px, 3.4vw, 44px)', fontWeight: 650,
-                        letterSpacing: '-0.045em', lineHeight: 1.05, marginBottom: 18,
-                    }}>
-                        Cada horário,<br />
-                        <span style={{ color: 'var(--accent)' }}>sob controle.</span>
+                <div style={{ maxWidth: 440 }}>
+                    <h1 className="serif" style={{ fontSize: 'clamp(40px, 4.6vw, 62px)', lineHeight: 1.02, letterSpacing: '-0.025em' }}>
+                        Seu dia,<br />em ordem.
                     </h1>
-                    <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 360 }}>
-                        Agenda online, fila de espera inteligente e pagamento antecipado.
-                        Tudo sincronizado em tempo real com a sua equipe.
+                    <p style={{ color: 'var(--text-secondary)', marginTop: 16, maxWidth: 380, fontSize: 16 }}>
+                        Agenda online, fila de espera e pagamento antecipado, tudo no mesmo lugar para você e sua equipe.
                     </p>
                 </div>
 
-                {/* Linha do tempo ilustrativa */}
-                <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{
+                    background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+                    padding: '14px 16px 6px', maxWidth: 460, position: 'relative',
+                }}>
                     {[
-                        { t: '09:00', n: 'Corte + barba', s: 'confirmado', on: true },
-                        { t: '10:30', n: 'Coloração', s: 'aguardando', on: false },
-                        { t: '11:15', n: 'Vaga liberada', s: 'fila notificada', on: true },
-                    ].map(({ t, n, s: st, on }) => (
-                        <div key={t} style={{
-                            display: 'flex', alignItems: 'center', gap: 14,
-                            padding: '12px 14px', marginBottom: 8,
-                            border: '1px solid var(--border)', borderRadius: 'var(--radius)',
-                            background: 'var(--bg-surface)',
-                        }}>
-                            <span className="mono" style={{ fontSize: 13, color: 'var(--accent)', minWidth: 42 }}>{t}</span>
-                            <span style={{ fontSize: 13.5, fontWeight: 500, flex: 1 }}>{n}</span>
-                            <span className="mono" style={{
-                                fontSize: 10.5, letterSpacing: '0.04em', textTransform: 'uppercase',
-                                color: on ? 'var(--success)' : 'var(--text-muted)',
-                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                        { t: '09:00', n: 'Corte e barba', d: '45 min', state: 'ok' },
+                        { t: '10:00', n: 'Coloração', d: '1 h 30', state: 'wait' },
+                        { t: '11:30', n: 'Vaga livre', d: 'fila avisada', state: 'free' },
+                    ].map(({ t, n, d, state }) => (
+                        <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '7px 0', borderBottom: '1px solid var(--border)' }}>
+                            <span style={{ width: 44, fontSize: 13, color: 'var(--text-muted)' }}>{t}</span>
+                            <span style={{
+                                flex: 1, padding: '6px 10px', borderRadius: 5, fontSize: 14, fontWeight: 600,
+                                background: state === 'ok' ? 'var(--mark-soft)' : 'transparent',
+                                border: state === 'wait' ? '1.5px dashed var(--border-strong)' : state === 'free' ? '1px solid transparent' : '1px solid transparent',
+                                color: state === 'free' ? 'var(--text-muted)' : 'var(--text)',
+                                fontStyle: state === 'free' ? 'italic' : 'normal',
                             }}>
-                                <span style={{
-                                    width: 6, height: 6, borderRadius: '50%',
-                                    background: on ? 'var(--success)' : 'var(--text-faint)',
-                                }} />
-                                {st}
+                                {n} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: 12.5 }}>{d}</span>
                             </span>
                         </div>
                     ))}
+                    <div style={{ height: 8 }} />
                 </div>
             </div>
 
@@ -277,7 +248,7 @@ export function LoginPage() {
                                 <label style={{
                                     fontSize: 11, fontWeight: 600,
                                     color: 'var(--text-secondary)',
-                                    letterSpacing: '0.04em', textTransform: 'uppercase',
+                                    letterSpacing: '0.04em',
                                 }}>
                                     Comércio
                                 </label>

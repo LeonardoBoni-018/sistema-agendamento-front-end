@@ -89,7 +89,7 @@ export function NewAppointmentPage() {
                     <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                         <div style={{
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                            letterSpacing: '0.06em', marginBottom: 10,
                         }}>
                             1 · Serviço
                         </div>
@@ -112,7 +112,6 @@ export function NewAppointmentPage() {
                                 background: 'var(--bg-surface)',
                                 borderRadius: 'var(--radius-sm)',
                                 fontSize: 13, color: 'var(--text-muted)',
-                                borderLeft: '3px solid var(--accent)',
                             }}>
                                 {selectedJob.description}
                             </div>
@@ -124,7 +123,7 @@ export function NewAppointmentPage() {
                         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                             <div style={{
                                 fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                                letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                                letterSpacing: '0.06em', marginBottom: 10,
                             }}>
                                 2 · Profissional (opcional)
                             </div>
@@ -143,7 +142,7 @@ export function NewAppointmentPage() {
                     <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                         <div style={{
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                            letterSpacing: '0.06em', marginBottom: 10,
                         }}>
                             {funcionarios.length > 0 ? '3' : '2'} · Data
                         </div>
@@ -164,7 +163,7 @@ export function NewAppointmentPage() {
                     <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                         <div style={{
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10,
+                            letterSpacing: '0.06em', marginBottom: 10,
                         }}>
                             {funcionarios.length > 0 ? '4' : '3'} · Horário
                         </div>

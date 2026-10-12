@@ -294,8 +294,7 @@ export function ConfiguracaoPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 <label style={{
                                     fontSize: 11, fontWeight: 600,
-                                    color: 'var(--text-faint)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    color: 'var(--text-faint)', letterSpacing: '0.06em',
                                 }}>
                                     Data início
                                 </label>
@@ -311,8 +310,7 @@ export function ConfiguracaoPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 <label style={{
                                     fontSize: 11, fontWeight: 600,
-                                    color: 'var(--text-faint)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    color: 'var(--text-faint)', letterSpacing: '0.06em',
                                 }}>
                                     Data fim
                                 </label>
@@ -331,8 +329,7 @@ export function ConfiguracaoPage() {
                             }}>
                                 <label style={{
                                     fontSize: 11, fontWeight: 600,
-                                    color: 'var(--text-faint)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    color: 'var(--text-faint)', letterSpacing: '0.06em',
                                 }}>
                                     Motivo (opcional)
                                 </label>
@@ -372,8 +369,7 @@ export function ConfiguracaoPage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     <label style={{
                                         fontSize: 11, fontWeight: 600,
-                                        color: 'var(--text-faint)',
-                                        textTransform: 'uppercase', letterSpacing: '0.06em',
+                                        color: 'var(--text-faint)', letterSpacing: '0.06em',
                                     }}>
                                         Hora início
                                     </label>
@@ -389,8 +385,7 @@ export function ConfiguracaoPage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     <label style={{
                                         fontSize: 11, fontWeight: 600,
-                                        color: 'var(--text-faint)',
-                                        textTransform: 'uppercase', letterSpacing: '0.06em',
+                                        color: 'var(--text-faint)', letterSpacing: '0.06em',
                                     }}>
                                         Hora fim
                                     </label>

@@ -200,8 +200,7 @@ export function FilaPage() {
                         ].map(({ label, element }) => (
                             <div key={label}>
                                 <label style={{
-                                    fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em',
                                     display: 'block', marginBottom: 5,
                                 }}>
                                     {label}

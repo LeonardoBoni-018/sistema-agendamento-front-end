@@ -115,7 +115,7 @@ export function AdminAppointmentsPage() {
                             gridTemplateColumns: '1.5fr 1.5fr 1fr 80px 90px 110px 130px',
                             padding: '10px 20px', borderBottom: '1px solid var(--border)',
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase',
+                            letterSpacing: '0.06em',
                         }}>
                             <span>Cliente</span><span>Serviço</span><span>Data</span>
                             <span>Hora</span><span>Valor</span><span>Status</span>

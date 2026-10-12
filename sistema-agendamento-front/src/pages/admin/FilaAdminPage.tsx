@@ -50,8 +50,7 @@ export function FilaAdminPage() {
                     .map(([date, items]) => (
                         <div key={date} style={{ marginBottom: 16 }}>
                             <div style={{
-                                fontSize: 11, fontWeight: 700, color: 'var(--text-faint)',
-                                textTransform: 'uppercase', letterSpacing: '0.06em',
+                                fontSize: 11, fontWeight: 700, color: 'var(--text-faint)', letterSpacing: '0.06em',
                                 marginBottom: 8,
                             }}>
                                 {format(parseISO(date), "EEEE, dd 'de' MMMM", { locale: ptBR })}

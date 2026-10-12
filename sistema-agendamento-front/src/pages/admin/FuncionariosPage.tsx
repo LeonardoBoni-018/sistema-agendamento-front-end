@@ -144,8 +144,7 @@ export function FuncionariosPage() {
                                 }}>
                                     <label style={{
                                         fontSize: 11, fontWeight: 600,
-                                        color: 'var(--text-faint)',
-                                        textTransform: 'uppercase', letterSpacing: '0.06em',
+                                        color: 'var(--text-faint)', letterSpacing: '0.06em',
                                     }}>
                                         {label}
                                     </label>

@@ -168,7 +168,7 @@ export function ClientesPage() {
                             gridTemplateColumns: '2fr 1fr 80px 100px 100px 60px',
                             padding: '10px 20px', borderBottom: '1px solid var(--border)',
                             fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            letterSpacing: '0.06em', textTransform: 'uppercase',
+                            letterSpacing: '0.06em',
                         }}>
                             <span>Cliente</span>
                             <span>Serviço favorito</span>

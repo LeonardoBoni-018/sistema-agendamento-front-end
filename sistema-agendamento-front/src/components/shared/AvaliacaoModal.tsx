@@ -75,8 +75,7 @@ export function AvaliacaoModal({ appointment, onClose, onSuccess }: Props) {
                 {nota > 0 && (
                     <div style={{ marginBottom: 6 }}>
                         <div style={{
-                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)',
-                            textTransform: 'uppercase', letterSpacing: '0.06em',
+                            fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em',
                             marginBottom: 6,
                         }}>
                             Comentário (opcional)

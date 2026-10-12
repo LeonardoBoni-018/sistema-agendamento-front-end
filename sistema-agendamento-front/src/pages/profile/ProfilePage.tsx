@@ -71,7 +71,7 @@ export function ProfilePage() {
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>
                                 Nome
                             </label>
                             <input {...register('name')} style={inputStyle} />
@@ -79,7 +79,7 @@ export function ProfilePage() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>
                                 Telefone
                             </label>
                             <input {...register('phone')} style={inputStyle} />
@@ -87,7 +87,7 @@ export function ProfilePage() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-faint)', letterSpacing: '0.06em' }}>
                                 Email
                             </label>
                             <div style={{

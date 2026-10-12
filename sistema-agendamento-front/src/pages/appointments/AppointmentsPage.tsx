@@ -219,7 +219,6 @@ export function AppointmentsPage() {
                 <Card style={{
                     marginBottom: 16,
                     borderColor: 'var(--accent)',
-                    borderLeft: '3px solid var(--accent)',
                     animation: 'fadeInScale 0.2s ease both',
                 }}>
                     <div style={{
@@ -241,8 +240,7 @@ export function AppointmentsPage() {
                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                         <div>
                             <div style={{
-                                fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
-                                textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5,
+                                fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em', marginBottom: 5,
                             }}>
                                 Nova data
                             </div>
@@ -259,8 +257,7 @@ export function AppointmentsPage() {
                         {novaData && (
                             <div>
                                 <div style={{
-                                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5,
+                                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em', marginBottom: 5,
                                 }}>
                                     Novo horário
                                 </div>
@@ -285,7 +282,7 @@ export function AppointmentsPage() {
                                                     color: novoHorario === t ? 'var(--on-strong)' : 'var(--text-secondary)',
                                                     border: `1px solid ${novoHorario === t ? 'var(--text)' : 'var(--border)'}`,
                                                     transition: 'all var(--transition)',
-                                                    fontFamily: 'var(--font-mono)',
+                                                    
                                                 }}
                                             >
                                                 {t?.slice(0, 5)}
@@ -349,8 +346,7 @@ export function AppointmentsPage() {
                         }}>
                             {['Serviço', 'Data', 'Hora', 'Valor', 'Status', 'Ações'].map(h => (
                                 <span key={h} style={{
-                                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
-                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
                                 }}>
                   {h}
                 </span>
@@ -391,7 +387,7 @@ export function AppointmentsPage() {
                                     </div>
                                     <div style={{
                                         fontSize: 12, color: 'var(--text-secondary)',
-                                        fontFamily: 'var(--font-mono)',
+                                        
                                     }}>
                                         {a.time?.slice(0, 5)}
                                     </div>

@@ -14,8 +14,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                 {label && (
                     <label style={{
-                        fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)',
-                        letterSpacing: '0.04em', textTransform: 'uppercase',
+                        fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)',
                     }}>
                         {label}
                     </label>
@@ -38,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         style={{
                             width: '100%',
                             background: 'var(--bg-card)',
-                            border: `1px solid ${error ? 'var(--danger)' : focused ? 'var(--accent)' : 'var(--border)'}`,
+                            border: `1px solid ${error ? 'var(--danger)' : focused ? 'var(--text)' : 'var(--border-strong)'}`,
                             borderRadius: 'var(--radius-sm)',
                             padding: icon ? '9px 12px 9px 34px' : '9px 12px',
                             fontSize: 13,
@@ -46,9 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                             fontFamily: 'var(--font)',
                             outline: 'none',
                             transition: 'border-color var(--transition), box-shadow var(--transition)',
-                            boxShadow: focused
-                                ? `0 0 0 3px ${error ? 'var(--danger-light)' : 'var(--accent-light)'}`
-                                : 'var(--shadow-sm)',
+                            boxShadow: focused ? `0 0 0 3px ${error ? 'var(--danger-light)' : 'var(--mark-soft)'}` : 'none',
                             ...style,
                         }}
                         onFocus={e => { setFocused(true); props.onFocus?.(e) }}
