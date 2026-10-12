@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -52,11 +53,22 @@ export function LoginPage() {
         try {
             const response = await authService.login(data)
             setAuth(response.accessToken, response.refreshToken)
+        } catch (err) {
+            const status = (err as AxiosError).response?.status
+            if (status === 429) toast.error('Muitas tentativas. Aguarde um instante.')
+            else if (status === 400 || status === 401) toast.error('Email ou senha inválidos')
+            else toast.error('Não foi possível conectar ao servidor')
+            return
+        }
+
+        // Credenciais válidas: uma falha aqui é do servidor, não do usuário
+        try {
             const u = await userService.getMyProfile()
             setUser(u)
             navigate('/dashboard')
         } catch {
-            toast.error('Email ou senha inválidos')
+            useAuthStore.getState().logout()
+            toast.error('Erro ao carregar seu perfil. Tente novamente.')
         }
     }
 
